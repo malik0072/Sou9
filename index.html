@@ -7,39 +7,51 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; text-align: center; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 10px auto; }
-        h1 { color: #2e7d32; font-size: 24px; margin: 10px 0; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        button { background: #4CAF50; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .product { background: white; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; position: relative; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .product img { width: 100%; border-radius: 10px; height: 220px; object-fit: cover; }
-        .time-tag { font-size: 12px; color: #888; margin-bottom: 5px; display: block; }
-        .contact-box { display: flex; gap: 10px; margin-top: 10px; }
-        .wa-btn { flex: 1; background: #25D366; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; text-align: center; font-size: 14px; }
-        .call-btn { flex: 1; background: #007bff; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; text-align: center; font-size: 14px; }
-        .del-btn { position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.6); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; z-index: 10; }
+        :root { --main-color: #2e7d32; --bg-color: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); margin: 0; padding: 10px; }
+        
+        /* صندوق الإضافة - بشكل مضغوط */
+        .add-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto 20px; text-align: center; }
+        h1 { color: var(--main-color); font-size: 20px; margin: 0 0 10px; }
+        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .publish-btn { background: var(--main-color); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+
+        /* شبكة المنشورات - تصغير الحجم */
+        #market { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-width: 800px; margin: auto; }
+        .product { background: white; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .product img { width: 100%; height: 140px; object-fit: cover; }
+        
+        .p-info { padding: 10px; text-align: right; flex-grow: 1; }
+        .p-name { font-weight: bold; font-size: 15px; margin: 0; color: #333; }
+        .p-price { color: var(--main-color); font-weight: bold; font-size: 16px; margin: 5px 0; }
+        .p-time { font-size: 10px; color: #999; display: block; margin-bottom: 8px; }
+
+        /* أزرار الاتصال - بشكل مدمج */
+        .btn-group { display: flex; gap: 5px; }
+        .btn-group a { flex: 1; text-decoration: none; padding: 8px 2px; border-radius: 5px; font-size: 12px; font-weight: bold; text-align: center; color: white; }
+        .btn-wa { background: #25D366; }
+        .btn-call { background: #007bff; }
+        
+        /* زر الحذف الصغير */
+        .del-x { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 14px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="card">
+<div class="add-card">
     <h1>🐣 سوق المزرعة</h1>
-    <p style="color: #666; font-size: 14px;">أضف عرضك الآن (اتصال + واتساب)</p>
     <input type="text" id="pName" placeholder="اسم المنتج">
-    <input type="number" id="pPrice" placeholder="السعر بالدينار">
+    <input type="number" id="pPrice" placeholder="السعر (د.ت)">
     <input type="tel" id="pPhone" placeholder="رقم الهاتف">
-    <input type="password" id="pPass" placeholder="كلمة سر لحذف الإعلان">
+    <input type="password" id="pPass" placeholder="كلمة سر للحذف">
     <input type="file" id="pImg" accept="image/*">
-    <button onclick="publish()">نشر العرض الآن</button>
+    <button class="publish-btn" onclick="publish()">نشر العرض الآن</button>
 </div>
 
-<div id="market" style="max-width: 400px; margin: auto; padding-bottom: 30px;"></div>
+<div id="market"></div>
 
 <script>
-    const firebaseConfig = {
-        databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" 
-    };
+    const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("products");
 
@@ -50,23 +62,18 @@
         const pass = document.getElementById('pPass').value;
         const file = document.getElementById('pImg').files[0];
         
-        // تسجيل الوقت الحالي
         const now = new Date();
-        const timeString = now.toLocaleDateString('ar-TN') + " | " + now.toLocaleTimeString('ar-TN', {hour: '2-digit', minute:'2-digit'});
+        const timeStr = now.toLocaleDateString('ar-TN') + " " + now.toLocaleTimeString('ar-TN', {hour: '2-digit', minute:'2-digit'});
 
         if (file && name && phone && pass) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                db.push({ name, price, phone, pass, time: timeString, img: e.target.result });
-                alert("تم النشر بنجاح!");
-                document.getElementById('pName').value = "";
-                document.getElementById('pPrice').value = "";
-                document.getElementById('pPass').value = "";
+                db.push({ name, price, phone, pass, time: timeStr, img: e.target.result });
+                alert("تم النشر!");
+                location.reload(); // تحديث الصفحة لرؤية النتائج
             };
             reader.readAsDataURL(file);
-        } else {
-            alert("يرجى ملء كافة الخانات");
-        }
+        } else { alert("أكمل البيانات أولاً"); }
     }
 
     db.on("value", (snapshot) => {
@@ -74,29 +81,30 @@
         market.innerHTML = "";
         snapshot.forEach((child) => {
             const p = child.val();
+            // إصلاح رقم الهاتف لإزالة الفراغات والتأكد من عمل tel:
+            const cleanPhone = p.phone.replace(/\s/g, '');
+            
             market.innerHTML += `
                 <div class="product">
-                    <button class="del-btn" onclick="remove('${child.key}', '${p.pass}')">×</button>
-                    <span class="time-tag">📅 نُشر في: ${p.time || 'وقت غير محدد'}</span>
+                    <button class="del-x" onclick="remove('${child.key}', '${p.pass}')">×</button>
                     <img src="${p.img}">
-                    <h3 style="margin: 5px 0;">${p.name}</h3>
-                    <p style="font-size: 18px; color: #2e7d32; margin: 5px 0;">السعر: <b>${p.price} د.ت</b></p>
-                    <div class="contact-box">
-                        <a href="https://wa.me/${p.phone}" class="wa-btn">واتساب</a>
-                        <a href="tel:${p.phone}" class="call-btn">اتصال</a>
+                    <div class="p-info">
+                        <span class="p-time">${p.time || ''}</span>
+                        <p class="p-name">${p.name}</p>
+                        <p class="p-price">${p.price} د.ت</p>
+                        <div class="btn-group">
+                            <a href="tel:${cleanPhone}" class="btn-call">اتصال</a>
+                            <a href="https://wa.me/${cleanPhone}" class="btn-wa">واتساب</a>
+                        </div>
                     </div>
                 </div>`;
         });
     });
 
-    function remove(id, correctPass) {
-        const userPass = prompt("أدخل كلمة سر الإعلان لحذفه:");
-        if (userPass === correctPass) {
-            db.child(id).remove();
-            alert("تم الحذف.");
-        } else if (userPass !== null) {
-            alert("خطأ في كلمة السر!");
-        }
+    function remove(id, correct) {
+        const up = prompt("كلمة السر:");
+        if (up === correct) { db.child(id).remove(); }
+        else if (up !== null) { alert("خطأ"); }
     }
 </script>
 </body>
