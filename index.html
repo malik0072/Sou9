@@ -3,49 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سوق المزرعة - بيع وشراء</title>
+    <title>سوق المزرعة - Marketplace</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --main-color: #2e7d32; --bg-color: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); margin: 0; padding: 10px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; color: #1c1e21; }
         
-        /* صندوق الإضافة - بشكل مضغوط */
-        .add-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto 20px; text-align: center; }
-        h1 { color: var(--main-color); font-size: 20px; margin: 0 0 10px; }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .publish-btn { background: var(--main-color); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        /* صندوق الإضافة العلوي */
+        .header-card { background: white; padding: 15px; border-radius: 8px; max-width: 500px; margin: 0 auto 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        h1 { font-size: 20px; color: #2e7d32; margin: 0 0 10px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; background: #f5f6f7; box-sizing: border-box; }
+        .btn-post { background: #42b72a; color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 5px; }
 
-        /* شبكة المنشورات - تصغير الحجم */
-        #market { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-width: 800px; margin: auto; }
-        .product { background: white; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 1px solid #eee; }
-        .product img { width: 100%; height: 140px; object-fit: cover; }
+        /* تصميم الشبكة مثل فيسبوك (2 في كل صف) */
+        #market { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 600px; margin: auto; }
         
-        .p-info { padding: 10px; text-align: right; flex-grow: 1; }
-        .p-name { font-weight: bold; font-size: 15px; margin: 0; color: #333; }
-        .p-price { color: var(--main-color); font-weight: bold; font-size: 16px; margin: 5px 0; }
-        .p-time { font-size: 10px; color: #999; display: block; margin-bottom: 8px; }
+        .item-card { background: white; border-radius: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; border: 1px solid #ddd; }
+        
+        /* جعل الصورة مربعة تماماً مثل ماركت بلاس */
+        .img-container { width: 100%; padding-top: 100%; position: relative; background: #eee; }
+        .img-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        
+        .item-info { padding: 8px; text-align: right; }
+        .item-price { font-size: 17px; font-weight: bold; margin: 0; color: #1c1e21; }
+        .item-title { font-size: 14px; color: #65676b; margin: 2px 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* أزرار الاتصال - بشكل مدمج */
-        .btn-group { display: flex; gap: 5px; }
-        .btn-group a { flex: 1; text-decoration: none; padding: 8px 2px; border-radius: 5px; font-size: 12px; font-weight: bold; text-align: center; color: white; }
-        .btn-wa { background: #25D366; }
-        .btn-call { background: #007bff; }
+        /* أزرار التواصل السفلية */
+        .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 0 8px 8px; }
+        .btn-call { background: #e7f3ff; color: #1877f2; text-decoration: none; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; font-weight: 600; }
+        .btn-wa { background: #f0f2f5; color: #42b72a; text-decoration: none; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; font-weight: 600; }
         
-        /* زر الحذف الصغير */
-        .del-x { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 14px; cursor: pointer; }
+        .del-btn { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.3); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; z-index: 5; }
     </style>
 </head>
 <body>
 
-<div class="add-card">
+<div class="header-card">
     <h1>🐣 سوق المزرعة</h1>
-    <input type="text" id="pName" placeholder="اسم المنتج">
-    <input type="number" id="pPrice" placeholder="السعر (د.ت)">
+    <input type="text" id="pName" placeholder="ماذا تبيع؟">
+    <input type="number" id="pPrice" placeholder="السعر بالدينار">
     <input type="tel" id="pPhone" placeholder="رقم الهاتف">
     <input type="password" id="pPass" placeholder="كلمة سر للحذف">
     <input type="file" id="pImg" accept="image/*">
-    <button class="publish-btn" onclick="publish()">نشر العرض الآن</button>
+    <button class="btn-post" onclick="publish()">عرض للبيع</button>
 </div>
 
 <div id="market"></div>
@@ -61,19 +61,16 @@
         const phone = document.getElementById('pPhone').value;
         const pass = document.getElementById('pPass').value;
         const file = document.getElementById('pImg').files[0];
-        
-        const now = new Date();
-        const timeStr = now.toLocaleDateString('ar-TN') + " " + now.toLocaleTimeString('ar-TN', {hour: '2-digit', minute:'2-digit'});
 
-        if (file && name && phone && pass) {
+        if (file && name && price && phone && pass) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                db.push({ name, price, phone, pass, time: timeStr, img: e.target.result });
-                alert("تم النشر!");
-                location.reload(); // تحديث الصفحة لرؤية النتائج
+                db.push({ name, price, phone, pass, img: e.target.result });
+                alert("تم النشر في السوق!");
+                location.reload();
             };
             reader.readAsDataURL(file);
-        } else { alert("أكمل البيانات أولاً"); }
+        } else { alert("يرجى ملء جميع البيانات"); }
     }
 
     db.on("value", (snapshot) => {
@@ -81,30 +78,31 @@
         market.innerHTML = "";
         snapshot.forEach((child) => {
             const p = child.val();
-            // إصلاح رقم الهاتف لإزالة الفراغات والتأكد من عمل tel:
-            const cleanPhone = p.phone.replace(/\s/g, '');
+            // تنظيف الرقم لضمان عمل زر الاتصال
+            const telNum = p.phone.replace(/\s+/g, '');
             
             market.innerHTML += `
-                <div class="product">
-                    <button class="del-x" onclick="remove('${child.key}', '${p.pass}')">×</button>
-                    <img src="${p.img}">
-                    <div class="p-info">
-                        <span class="p-time">${p.time || ''}</span>
-                        <p class="p-name">${p.name}</p>
-                        <p class="p-price">${p.price} د.ت</p>
-                        <div class="btn-group">
-                            <a href="tel:${cleanPhone}" class="btn-call">اتصال</a>
-                            <a href="https://wa.me/${cleanPhone}" class="btn-wa">واتساب</a>
-                        </div>
+                <div class="item-card">
+                    <button class="del-btn" onclick="remove('${child.key}', '${p.pass}')">×</button>
+                    <div class="img-container">
+                        <img src="${p.img}">
+                    </div>
+                    <div class="item-info">
+                        <p class="item-price">${p.price} د.ت</p>
+                        <p class="item-title">${p.name}</p>
+                    </div>
+                    <div class="item-actions">
+                        <a href="tel:${telNum}" class="btn-call">اتصال</a>
+                        <a href="https://wa.me/${telNum}" class="btn-wa">واتساب</a>
                     </div>
                 </div>`;
         });
     });
 
     function remove(id, correct) {
-        const up = prompt("كلمة السر:");
-        if (up === correct) { db.child(id).remove(); }
-        else if (up !== null) { alert("خطأ"); }
+        const up = prompt("أدخل كلمة السر للحذف:");
+        if (up === correct) { db.child(id).remove(); alert("تم الحذف"); }
+        else if (up !== null) { alert("كلمة سر خاطئة"); }
     }
 </script>
 </body>
