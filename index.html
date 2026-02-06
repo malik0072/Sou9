@@ -7,33 +7,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; color: #1c1e21; }
-        
-        /* صندوق الإضافة العلوي */
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
         .header-card { background: white; padding: 15px; border-radius: 8px; max-width: 500px; margin: 0 auto 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        h1 { font-size: 20px; color: #2e7d32; margin: 0 0 10px; text-align: center; }
+        h1 { font-size: 20px; color: #2e7d32; text-align: center; margin: 0 0 10px; }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; background: #f5f6f7; box-sizing: border-box; }
-        .btn-post { background: #42b72a; color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 5px; }
+        .btn-post { background: #42b72a; color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* تصميم الشبكة مثل فيسبوك (2 في كل صف) */
+        /* تصميم الشبكة مثل فيسبوك */
         #market { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 600px; margin: auto; }
-        
-        .item-card { background: white; border-radius: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; border: 1px solid #ddd; }
-        
-        /* جعل الصورة مربعة تماماً مثل ماركت بلاس */
+        .item-card { background: white; border-radius: 0; overflow: hidden; position: relative; border: 1px solid #ddd; display: flex; flex-direction: column; }
         .img-container { width: 100%; padding-top: 100%; position: relative; background: #eee; }
         .img-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        
         .item-info { padding: 8px; text-align: right; }
         .item-price { font-size: 17px; font-weight: bold; margin: 0; color: #1c1e21; }
-        .item-title { font-size: 14px; color: #65676b; margin: 2px 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* أزرار التواصل السفلية */
+        .item-title { font-size: 14px; color: #65676b; margin: 2px 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 0 8px 8px; }
         .btn-call { background: #e7f3ff; color: #1877f2; text-decoration: none; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; font-weight: 600; }
         .btn-wa { background: #f0f2f5; color: #42b72a; text-decoration: none; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; font-weight: 600; }
-        
-        .del-btn { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.3); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; z-index: 5; }
+        .del-btn { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.3); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; z-index: 5; }
     </style>
 </head>
 <body>
@@ -66,27 +57,28 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 db.push({ name, price, phone, pass, img: e.target.result });
-                alert("تم النشر في السوق!");
-                location.reload();
+                alert("تم النشر!");
+                window.location.reload(); // تحديث إجباري بعد النشر
             };
             reader.readAsDataURL(file);
-        } else { alert("يرجى ملء جميع البيانات"); }
+        } else { alert("يرجى ملء كافة البيانات"); }
     }
 
+    // استدعاء البيانات وتحديث الصفحة تلقائياً
     db.on("value", (snapshot) => {
         const market = document.getElementById('market');
         market.innerHTML = "";
+        let items = [];
         snapshot.forEach((child) => {
-            const p = child.val();
-            // تنظيف الرقم لضمان عمل زر الاتصال
+            items.unshift({ id: child.key, ...child.val() }); // وضع الأحدث في البداية
+        });
+
+        items.forEach((p) => {
             const telNum = p.phone.replace(/\s+/g, '');
-            
             market.innerHTML += `
                 <div class="item-card">
-                    <button class="del-btn" onclick="remove('${child.key}', '${p.pass}')">×</button>
-                    <div class="img-container">
-                        <img src="${p.img}">
-                    </div>
+                    <button class="del-btn" onclick="remove('${p.id}', '${p.pass}')">×</button>
+                    <div class="img-container"><img src="${p.img}"></div>
                     <div class="item-info">
                         <p class="item-price">${p.price} د.ت</p>
                         <p class="item-title">${p.name}</p>
@@ -100,9 +92,9 @@
     });
 
     function remove(id, correct) {
-        const up = prompt("أدخل كلمة السر للحذف:");
-        if (up === correct) { db.child(id).remove(); alert("تم الحذف"); }
-        else if (up !== null) { alert("كلمة سر خاطئة"); }
+        const up = prompt("كلمة السر:");
+        if (up === correct) { db.child(id).remove(); window.location.reload(); }
+        else if (up !== null) { alert("خطأ!"); }
     }
 </script>
 </body>
