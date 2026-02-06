@@ -9,37 +9,23 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 8px; }
-        
-        /* صندوق الإضافة */
         .header-card { background: white; padding: 12px; border-radius: 8px; max-width: 500px; margin: 0 auto 12px; border: 1px solid #ddd; }
         h1 { font-size: 18px; color: #2e7d32; text-align: center; margin: 0 0 10px; }
         input { width: 100%; padding: 8px; margin: 4px 0; border: 1px solid #ddd; border-radius: 4px; background: #f5f6f7; font-size: 14px; }
-        .btn-post { background: #42b72a; color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn-post { background: #42b72a; color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        /* الشبكة: صورتين في الصف مهما كان حجم الشاشة */
-        #market { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* هذا الأمر يجبر المتصفح على تقسيم الصف لنصفين */
-            gap: 6px; 
-            max-width: 600px; 
-            margin: auto; 
-        }
-
+        /* الشبكة السريعة */
+        #market { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 600px; margin: auto; min-height: 200px; }
         .item-card { background: white; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid #ddd; display: flex; flex-direction: column; }
-        
-        /* صورة مربعة تماماً */
         .img-container { width: 100%; position: relative; padding-top: 100%; background: #eee; }
         .img-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        
         .item-info { padding: 6px; text-align: right; }
         .item-price { font-size: 15px; font-weight: bold; margin: 0; color: #1c1e21; }
         .item-title { font-size: 13px; color: #65676b; margin: 2px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
         .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 0 6px 6px; }
         .btn-call { background: #e7f3ff; color: #1877f2; text-decoration: none; padding: 6px; border-radius: 4px; font-size: 12px; text-align: center; font-weight: 600; }
         .btn-wa { background: #f0f2f5; color: #42b72a; text-decoration: none; padding: 6px; border-radius: 4px; font-size: 12px; text-align: center; font-weight: 600; }
-        
-        .del-btn { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.3); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; z-index: 5; font-size: 14px; }
+        .del-btn { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.3); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; z-index: 5; }
     </style>
 </head>
 <body>
@@ -54,6 +40,7 @@
     <button class="btn-post" onclick="publish()">عرض للبيع</button>
 </div>
 
+<div id="loading" style="text-align:center; color:#888; padding:20px;">جاري جلب العروض...</div>
 <div id="market"></div>
 
 <script>
@@ -61,34 +48,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("products");
 
-    function publish() {
-        const name = document.getElementById('pName').value;
-        const price = document.getElementById('pPrice').value;
-        const phone = document.getElementById('pPhone').value;
-        const pass = document.getElementById('pPass').value;
-        const file = document.getElementById('pImg').files[0];
-
-        if (file && name && price && phone && pass) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                db.push({ name, price, phone, pass, img: e.target.result });
-                alert("تم النشر!");
-                location.reload();
-            };
-            reader.readAsDataURL(file);
-        } else { alert("أكمل البيانات"); }
-    }
-
-    db.on("value", (snapshot) => {
+    // وظيفة العرض (منفصلة لسرعة الاستدعاء)
+    function render(snapshot) {
         const market = document.getElementById('market');
+        const loading = document.getElementById('loading');
         market.innerHTML = "";
+        if(loading) loading.style.display = "none";
+        
         let items = [];
         snapshot.forEach((child) => {
             items.unshift({ id: child.key, ...child.val() }); 
         });
 
         items.forEach((p) => {
-            const telNum = p.phone.replace(/\s+/g, '');
+            const telNum = p.phone ? p.phone.replace(/\s+/g, '') : '';
             market.innerHTML += `
                 <div class="item-card">
                     <button class="del-btn" onclick="remove('${p.id}', '${p.pass}')">×</button>
@@ -103,11 +76,34 @@
                     </div>
                 </div>`;
         });
-    });
+    }
+
+    // جلب البيانات فوراً وبأسرع طريقة
+    db.once("value", render); // جلب سريع لأول مرة
+    db.on("value", render);   // تحديث تلقائي عند أي تغيير
+
+    function publish() {
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const phone = document.getElementById('pPhone').value;
+        const pass = document.getElementById('pPass').value;
+        const file = document.getElementById('pImg').files[0];
+
+        if (file && name && price && phone && pass) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                db.push({ name, price, phone, pass, img: e.target.result }).then(() => {
+                    alert("تم النشر!");
+                    location.reload();
+                });
+            };
+            reader.readAsDataURL(file);
+        } else { alert("أكمل البيانات"); }
+    }
 
     function remove(id, correct) {
         const up = prompt("كلمة السر:");
-        if (up === correct) { db.child(id).remove(); location.reload(); }
+        if (up === correct) { db.child(id).remove().then(() => location.reload()); }
         else if (up !== null) { alert("خطأ!"); }
     }
 </script>
