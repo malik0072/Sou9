@@ -3,59 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سوق المزرعة الجماعي</title>
+    <title>سوق المزرعة - بيع وشراء</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; text-align: center; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 10px auto; }
+        h1 { color: #2e7d32; font-size: 24px; margin: 10px 0; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         button { background: #4CAF50; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .product { background: white; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; position: relative; }
-        .product img { width: 100%; border-radius: 10px; height: 180px; object-fit: cover; }
-        .wa-btn { display: block; background: #25D366; color: white; text-decoration: none; padding: 12px; border-radius: 10px; margin-top: 10px; font-weight: bold; }
-        .del-btn { position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.7); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; }
+        .product { background: white; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; position: relative; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .product img { width: 100%; border-radius: 10px; height: 220px; object-fit: cover; }
+        .time-tag { font-size: 12px; color: #888; margin-bottom: 5px; display: block; }
+        .contact-box { display: flex; gap: 10px; margin-top: 10px; }
+        .wa-btn { flex: 1; background: #25D366; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; text-align: center; font-size: 14px; }
+        .call-btn { flex: 1; background: #007bff; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; text-align: center; font-size: 14px; }
+        .del-btn { position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.6); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; z-index: 10; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>🐣 سوق المزرعة للجميع</h1>
+    <h1>🐣 سوق المزرعة</h1>
+    <p style="color: #666; font-size: 14px;">أضف عرضك الآن (اتصال + واتساب)</p>
     <input type="text" id="pName" placeholder="اسم المنتج">
     <input type="number" id="pPrice" placeholder="السعر بالدينار">
-    <input type="tel" id="pPhone" placeholder="رقم الواتساب (مثال: 216xxxxxxx)">
+    <input type="tel" id="pPhone" placeholder="رقم الهاتف">
+    <input type="password" id="pPass" placeholder="كلمة سر لحذف الإعلان">
     <input type="file" id="pImg" accept="image/*">
-    <button onclick="publish()">نشر العرض للجميع</button>
+    <button onclick="publish()">نشر العرض الآن</button>
 </div>
 
-<div id="market"></div>
+<div id="market" style="max-width: 400px; margin: auto; padding-bottom: 30px;"></div>
 
 <script>
-    // إعدادات قاعدة البيانات (سنملأها في الخطوة القادمة)
     const firebaseConfig = {
-        databaseURL: "YOUR_FIREBASE_URL_HERE"
+        databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" 
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("products");
 
-    // وظيفة النشر
     function publish() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
         const phone = document.getElementById('pPhone').value;
+        const pass = document.getElementById('pPass').value;
         const file = document.getElementById('pImg').files[0];
+        
+        // تسجيل الوقت الحالي
+        const now = new Date();
+        const timeString = now.toLocaleDateString('ar-TN') + " | " + now.toLocaleTimeString('ar-TN', {hour: '2-digit', minute:'2-digit'});
 
-        if (file && name && phone) {
+        if (file && name && phone && pass) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                db.push({ name, price, phone, img: e.target.result });
+                db.push({ name, price, phone, pass, time: timeString, img: e.target.result });
                 alert("تم النشر بنجاح!");
+                document.getElementById('pName').value = "";
+                document.getElementById('pPrice').value = "";
+                document.getElementById('pPass').value = "";
             };
             reader.readAsDataURL(file);
+        } else {
+            alert("يرجى ملء كافة الخانات");
         }
     }
 
-    // عرض المنتجات للجميع لحظياً
     db.on("value", (snapshot) => {
         const market = document.getElementById('market');
         market.innerHTML = "";
@@ -63,19 +76,26 @@
             const p = child.val();
             market.innerHTML += `
                 <div class="product">
-                    <button class="del-btn" onclick="remove('${child.key}')">×</button>
+                    <button class="del-btn" onclick="remove('${child.key}', '${p.pass}')">×</button>
+                    <span class="time-tag">📅 نُشر في: ${p.time || 'وقت غير محدد'}</span>
                     <img src="${p.img}">
-                    <h3>${p.name}</h3>
-                    <p>السعر: ${p.price} د</p>
-                    <a href="https://wa.me/${p.phone}" class="wa-btn">واتساب ✅</a>
+                    <h3 style="margin: 5px 0;">${p.name}</h3>
+                    <p style="font-size: 18px; color: #2e7d32; margin: 5px 0;">السعر: <b>${p.price} د.ت</b></p>
+                    <div class="contact-box">
+                        <a href="https://wa.me/${p.phone}" class="wa-btn">واتساب</a>
+                        <a href="tel:${p.phone}" class="call-btn">اتصال</a>
+                    </div>
                 </div>`;
         });
     });
 
-    // وظيفة الحذف
-    function remove(id) {
-        if(confirm("هل تريد حذف هذا العرض؟")) {
+    function remove(id, correctPass) {
+        const userPass = prompt("أدخل كلمة سر الإعلان لحذفه:");
+        if (userPass === correctPass) {
             db.child(id).remove();
+            alert("تم الحذف.");
+        } else if (userPass !== null) {
+            alert("خطأ في كلمة السر!");
         }
     }
 </script>
