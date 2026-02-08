@@ -7,71 +7,123 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: system-ui, sans-serif; background: #f0f2f5; text-align: center; padding: 15px; }
-        .publish-box { background: white; padding: 20px; border-radius: 15px; border: 2px solid #28a745; max-width: 450px; margin: auto; }
-        input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .btn { background: #28a745; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
-        .grid { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
-        .card { background: white; border-radius: 12px; padding: 10px; margin: 10px; width: 160px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+        body { font-family: system-ui, sans-serif; background: #f0f2f5; text-align: center; padding: 15px; margin: 0; }
+        .publish-box { background: white; padding: 20px; border-radius: 15px; border: 2px solid #28a745; max-width: 450px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .btn { background: #28a745; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 95%; font-size: 18px; transition: 0.3s; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 25px; gap: 15px; }
+        .card { background: white; border-radius: 12px; padding: 10px; width: 160px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: right; }
+        .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; background: #eee; }
+        .card h4 { margin: 10px 0 5px; font-size: 15px; color: #333; }
+        .card p { margin: 0; font-size: 14px; color: #28a745; font-weight: bold; }
+        #s { margin-top: 10px; font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>🚜 سوق المزرعة</h1>
+    
     <div class="publish-box">
-        <h3>انشر إعلانك مجاناً</h3>
-        <input type="text" id="t" placeholder="ماذا تبيع؟">
+        <h3 style="margin-top:0;">انشر إعلانك مجاناً</h3>
+        <input type="text" id="t" placeholder="ماذا تبيع؟ (مثلاً: فلالس)">
         <input type="tel" id="p" placeholder="رقم الهاتف">
         <input type="file" id="f" accept="image/*">
         <button class="btn" id="b" onclick="up()">نشر الإعلان الآن</button>
         <p id="s"></p>
     </div>
 
+    <h3 style="margin-top:30px;">الإعلانات المتوفرة:</h3>
     <div class="grid" id="g">جاري تحميل الإعلانات...</div>
 
 <script>
-    // ضع إعداداتك هنا (بدون خوف، القواعد تحميك الآن)
-    const conf = {
-        apiKey: "AIzaSy...", 
-        databaseURL: "رابط_قاعدة_بياناتك_هنا",
-        projectId: "معرف_مشروعك",
-        appId: "معرف_تطبيقك"
+    // 1. بيانات مشروعك "Sou9" الحقيقية
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4rvdoGMlMBo1zHcbUM9tiJw-fm5um8TU",
+      authDomain: "sou9-c7e27.firebaseapp.com",
+      databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com",
+      projectId: "sou9-c7e27",
+      storageBucket: "sou9-c7e27.firebasestorage.app",
+      messagingSenderId: "1042380369873",
+      appId: "1:1042380369873:web:d0805602ca67edd3a7baf0"
     };
-    firebase.initializeApp(conf);
+    
+    // تشغيل Firebase
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // وظيفة النشر للجميع (تعمل بفضل !data.exists)
+    // 2. وظيفة النشر السريع
     async function up() {
         const file = document.getElementById('f').files[0];
         const title = document.getElementById('t').value;
         const phone = document.getElementById('p').value;
         const msg = document.getElementById('s');
-        if(!file || !title || !phone) return alert("أكمل البيانات");
+        const btn = document.getElementById('b');
 
-        msg.innerText = "⚡ جاري النشر...";
-        document.getElementById('b').disabled = true;
+        if(!file || !title || !phone) return alert("الرجاء إكمال كافة البيانات");
+
+        msg.style.color = "blue";
+        msg.innerText = "⚡ جاري رفع الصورة والنشر...";
+        btn.disabled = true;
 
         try {
-            const fd = new FormData(); fd.append("image", file);
-            const res = await fetch("https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189", {method:"POST", body:fd});
+            // الرفع لـ ImgBB لتقليل الحمل على Firebase
+            const fd = new FormData(); 
+            fd.append("image", file);
+            
+            const res = await fetch("https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189", {
+                method: "POST", 
+                body: fd
+            });
+            
             const j = await res.json();
+            const imgUrl = j.data.url;
 
-            await db.ref('listings').push({ title, phone, img: j.data.url, time: Date.now() });
-            msg.innerText = "✅ تم النشر!";
-            document.getElementById('t').value = ""; document.getElementById('p').value = "";
-        } catch(e) { msg.innerText = "❌ خطأ في الاتصال"; }
-        finally { document.getElementById('b').disabled = false; }
+            // حفظ البيانات في Realtime Database
+            await db.ref('listings').push({
+                title: title,
+                phone: phone,
+                img: imgUrl,
+                time: Date.now()
+            });
+
+            msg.style.color = "green";
+            msg.innerText = "✅ تم النشر بنجاح!";
+            document.getElementById('t').value = ""; 
+            document.getElementById('p').value = "";
+            document.getElementById('f').value = "";
+        } catch(e) {
+            msg.style.color = "red";
+            msg.innerText = "❌ حدث خطأ في الاتصال";
+            console.error(e);
+        } finally {
+            btn.disabled = false;
+        }
     }
 
-    // عرض الإعلانات للجميع
-    db.ref('listings').on('value', snap => {
-        const g = document.getElementById('g'); g.innerHTML = "";
-        if(!snap.exists()) { g.innerHTML = "لا توجد إعلانات."; return; }
-        snap.forEach(c => {
-            const d = c.val();
-            g.innerHTML += `<div class="card"><img src="${d.img}"><h4>${d.title}</h4><p>📞 ${d.phone}</p></div>`;
+    // 3. تحميل وعرض الإعلانات فوراً
+    db.ref('listings').orderByChild('time').on('value', snap => {
+        const g = document.getElementById('g');
+        g.innerHTML = "";
+        
+        if(!snap.exists()) {
+            g.innerHTML = "<p>لا توجد إعلانات حالياً.</p>";
+            return;
+        }
+
+        let items = [];
+        snap.forEach(c => { items.unshift(c.val()); }); // الأحدث أولاً
+
+        items.forEach(d => {
+            g.innerHTML += `
+                <div class="card">
+                    <img src="${d.img}" loading="lazy">
+                    <h4>${d.title}</h4>
+                    <p>📞 ${d.phone}</p>
+                </div>`;
         });
+    }, error => {
+        document.getElementById('g').innerText = "خطأ في تحميل البيانات.";
     });
 </script>
 </body>
