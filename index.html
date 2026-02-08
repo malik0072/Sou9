@@ -44,7 +44,7 @@ input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; borde
 </div>
 
 <div id="adsContainer"></div>
-<div class="footer">صنع في تستور ❤️ مالك</div>
+<div class="footer">صنع بكل فخر في تستور ❤️ مالك 2026</div>
 
 <script>
 const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
@@ -87,13 +87,13 @@ async function publishAd() {
             const sec = Math.random().toString(36).substring(7).toUpperCase();
             const adRef = await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:sec, d:Date.now() });
             
-            // حفظ كود الحذف في ذاكرة الهاتف لكي يظهر تلقائياً لاحقاً
+            // حفظ كود الحذف فوراً في ذاكرة الهاتف قبل تحديث الصفحة لضمان بقائه
             localStorage.setItem('my_code_' + adRef.key, sec);
             
-            alert("✅ تم النشر بنجاح!\n\n🔑 كود الحذف الخاص بك: " + sec);
+            alert("✅ تم النشر بنجاح!\n\n🔑 كود الحذف الخاص بك هو: " + sec);
             location.reload();
         } else throw new Error();
-    } catch(e){ alert("❌ خطأ! جرب مرة أخرى."); b.disabled=false; b.innerText="نشر الإعلان"; }
+    } catch(e) { alert("❌ خطأ! جرب مرة أخرى."); b.disabled=false; b.innerText="نشر الإعلان"; }
 }
 
 db.ref('listings').on('value', s=>{
@@ -108,7 +108,8 @@ function renderAds(data){
         <img src="${a.i}" class="ad-image">
         <div class="ad-content">
             <span class="ad-title">${a.t}</span>
-            <span class="ad-price">السعر: ${a.pr}</span> <div class="contact-btns">
+            <span class="ad-price">السعر: ${a.pr}</span>
+            <div class="contact-btns">
                 <a href="tel:${a.p}" class="btn-call">📞 اتصال</a>
                 <a href="https://wa.me/216${a.p}" class="btn-wa">💬 واتساب</a>
             </div>
@@ -123,14 +124,17 @@ function filterAds(){
 }
 
 function delAd(id, serverCode){
-    // استرجاع الكود المحفوظ لهذا الإعلان تحديداً من ذاكرة الهاتف
+    // استرجاع الكود المحفوظ للإعلان من ذاكرة الهاتف وإظهاره تلقائياً
     const savedCode = localStorage.getItem('my_code_' + id) || "";
     
-    // إظهار مربع الطلب والكود مكتوب فيه مسبقاً
+    // المربع الآن سيظهر وفيه الكود مكتوباً جاهزاً للمستخدم
     const input = prompt("أدخل كود الحذف:", savedCode);
     
     if(input === serverCode || input === _0xM[0]) {
-        if(confirm("هل تريد حذف هذا الإعلان؟")) db.ref('listings/'+id).remove();
+        if(confirm("هل أنت متأكد من حذف هذا الإعلان؟")) {
+            db.ref('listings/'+id).remove();
+            localStorage.removeItem('my_code_' + id); // مسح الكود بعد الحذف
+        }
     } else if(input !== null) {
         alert("❌ الكود خاطئ");
     }
@@ -138,7 +142,7 @@ function delAd(id, serverCode){
 
 function checkAdmin(){
     const input = prompt("كود المدير:");
-    if(input===_0xM[0]) alert("📊 إحصائيات: " + ads.length + " إعلان");
+    if(input===_0xM[0]) alert("📊 إحصائيات: " + ads.length + " إعلان حالياً");
 }
 </script>
 </body>
