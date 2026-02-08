@@ -18,6 +18,7 @@ input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; borde
 .ad-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center; display:flex; flex-direction:column; }
 .ad-image { width:100%; height:140px; object-fit:cover; }
 .ad-content { padding:10px; flex-grow:1; }
+.ad-title { font-weight:bold; display:block; margin-bottom:2px; }
 .ad-price { color:#d32f2f; font-weight:bold; display:block; font-size:1.1rem; }
 .contact-btns { display:flex; gap:5px; margin-top:10px; }
 .btn-call { background:var(--p); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
@@ -51,7 +52,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 let ads = [];
 
-// كود المدير مشفر لحمايته
 const _0xM = ["\x40\x31\x35\x33\x30\x39\x30\x32\x35\x40"]; 
 
 async function compress(file) {
@@ -74,6 +74,7 @@ async function compress(file) {
 async function publishAd() {
     const title = document.getElementById('t').value, price = document.getElementById('pr').value, phone = document.getElementById('ph').value, file = document.getElementById('img').files[0];
     if(!title || !price || !phone || !file) return alert("أكمل البيانات!");
+    
     const b = document.getElementById('btn'); b.disabled=true; b.innerText="⏳ جاري الرفع...";
 
     try {
@@ -84,12 +85,15 @@ async function publishAd() {
 
         if(data.success){
             const sec = Math.random().toString(36).substring(7).toUpperCase();
-            await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:sec, d:Date.now() });
-            // تنبيه بظهور كود الحذف فوراً
+            const adRef = await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:sec, d:Date.now() });
+            
+            // حفظ كود الحذف في ذاكرة الهاتف لكي يظهر تلقائياً لاحقاً
+            localStorage.setItem('my_code_' + adRef.key, sec);
+            
             alert("✅ تم النشر بنجاح!\n\n🔑 كود الحذف الخاص بك: " + sec);
             location.reload();
         } else throw new Error();
-    } catch(e){ alert("❌ خطأ في الرفع! حاول مجدداً."); b.disabled=false; b.innerText="نشر الإعلان"; }
+    } catch(e){ alert("❌ خطأ! جرب مرة أخرى."); b.disabled=false; b.innerText="نشر الإعلان"; }
 }
 
 db.ref('listings').on('value', s=>{
@@ -103,8 +107,8 @@ function renderAds(data){
     <div class="ad-card">
         <img src="${a.i}" class="ad-image">
         <div class="ad-content">
-            <b>${a.t}</b><br><span class="ad-price">${a.pr}</span>
-            <div class="contact-btns">
+            <span class="ad-title">${a.t}</span>
+            <span class="ad-price">السعر: ${a.pr}</span> <div class="contact-btns">
                 <a href="tel:${a.p}" class="btn-call">📞 اتصال</a>
                 <a href="https://wa.me/216${a.p}" class="btn-wa">💬 واتساب</a>
             </div>
@@ -118,16 +122,23 @@ function filterAds(){
     renderAds(ads.filter(a=>a.t.toLowerCase().includes(term)));
 }
 
-function delAd(id, code){
-    const input = prompt("أدخل كود الحذف:");
-    if(input===code || input===_0xM[0]) {
-        if(confirm("حذف الإعلان؟")) db.ref('listings/'+id).remove();
-    } else if(input !== null) alert("❌ الكود خاطئ");
+function delAd(id, serverCode){
+    // استرجاع الكود المحفوظ لهذا الإعلان تحديداً من ذاكرة الهاتف
+    const savedCode = localStorage.getItem('my_code_' + id) || "";
+    
+    // إظهار مربع الطلب والكود مكتوب فيه مسبقاً
+    const input = prompt("أدخل كود الحذف:", savedCode);
+    
+    if(input === serverCode || input === _0xM[0]) {
+        if(confirm("هل تريد حذف هذا الإعلان؟")) db.ref('listings/'+id).remove();
+    } else if(input !== null) {
+        alert("❌ الكود خاطئ");
+    }
 }
 
 function checkAdmin(){
     const input = prompt("كود المدير:");
-    if(input===_0xM[0]) alert("📊 إجمالي الإعلانات: " + ads.length);
+    if(input===_0xM[0]) alert("📊 إحصائيات: " + ads.length + " إعلان");
 }
 </script>
 </body>
