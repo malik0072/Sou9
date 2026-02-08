@@ -3,123 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سوق المزرعة - النسخة المضمونة</title>
+    <title>سوق المزرعة - النسخة الاحترافية</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #2e7d32; --accent: #42b72a; --bg: #f0f2f5; }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); margin: 0; padding: 10px; }
+        :root { --primary: #2e7d32; --accent: #43a047; --bg: #f0f2f5; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
         
         /* الهيدر */
-        .header { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
-        h1 { color: var(--primary); margin: 0; font-size: 22px; cursor: pointer; }
+        .header { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
+        h1 { color: var(--primary); margin: 0; font-size: 24px; cursor: pointer; }
 
         /* نموذج الإضافة */
-        .post-box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ddd; }
-        input, select { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 8px; background: #f5f6f7; font-size: 14px; }
-        .btn-main { background: var(--accent); color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .post-box { background: white; padding: 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ddd; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; font-size: 15px; }
+        .btn-main { background: var(--accent); color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .btn-main:disabled { background: #ccc; }
 
         /* معاينة الصورة */
-        .img-preview { width: 100%; height: 150px; background: #eee; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #ccc; }
-        .img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
-
-        /* شبكة المنتجات */
-        #market { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; display: flex; flex-direction: column; }
-        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        .img-area { width: 100%; height: 160px; background: #fdfdfd; border: 2px dashed #bbb; border-radius: 10px; margin: 10px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; }
+        .img-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        
+        /* شبكة العرض */
+        #market { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 800px; margin: auto; }
+        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; display: flex; flex-direction: column; position: relative; }
+        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #eee; }
         .info { padding: 10px; flex-grow: 1; }
-        .price { font-size: 17px; font-weight: bold; color: var(--primary); margin: 0; }
-        .title { font-size: 14px; margin: 4px 0; font-weight: 500; }
+        .price { font-size: 18px; font-weight: 800; color: var(--primary); margin: 0; }
+        .title { font-size: 14px; margin: 5px 0; color: #333; height: 18px; overflow: hidden; text-overflow: ellipsis; }
 
         /* أزرار التواصل */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px; }
-        .btn-call { background: #1877f2; color: white; text-decoration: none; padding: 8px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; }
-        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 8px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; }
-        
-        #loading { display: none; text-align: center; color: var(--primary); font-weight: bold; margin: 10px; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; background: #f8f9fa; }
+        .btn-call { background: #007bff; color: white; text-decoration: none; padding: 9px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: bold; }
+        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 9px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: bold; }
+
+        #loadingOverlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:1000; justify-content:center; align-items:center; flex-direction:column; font-weight:bold; color:var(--primary); }
     </style>
 </head>
 <body>
 
+<div id="loadingOverlay">جاري رفع الإعلان... ⏳</div>
+
 <div class="header">
-    <h1 onclick="adminAccess()">🐣 سوق المزرعة</h1>
+    <h1 onclick="adminControl()">🐣 سوق المزرعة</h1>
 </div>
 
 <div class="post-box">
-    <input type="text" id="pTitle" placeholder="عنوان العرض (مثلاً: دجاج عربي)">
+    <input type="text" id="pTitle" placeholder="عنوان الإعلان (مثلاً: علوش ممتاز)">
     <input type="number" id="pPrice" placeholder="السعر (د.ت)">
-    <input type="tel" id="pPhone" placeholder="رقم الهاتف">
+    <input type="tel" id="pPhone" placeholder="رقم الهاتف التونسي (8 أرقام)">
     
-    <div class="img-preview" onclick="document.getElementById('pImg').click()">
-        <span id="pTxt">اضغط لإضافة صورة</span>
-        <img id="innerImg">
+    <div class="img-area" onclick="document.getElementById('fileInput').click()">
+        <span id="txtUpload">📸 اضغط لإضافة صورة</span>
+        <img id="previewImg">
     </div>
-    <input type="file" id="pImg" accept="image/*" style="display:none" onchange="preview(this)">
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="showPreview(this)">
     
-    <div id="loading">جاري النشر...</div>
-    <button class="btn-main" id="btnPublish" onclick="publish()">انشر الآن ✅</button>
+    <button class="btn-main" id="publishBtn" onclick="startPublish()">نشر العرض الآن 🚀</button>
 </div>
 
 <div id="market"></div>
 
 <script>
-    // إعدادات Firebase الخاصة بك (قاعدة البيانات فقط)
-    const firebaseConfig = { 
-        databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" 
-    };
+    // إعدادات Firebase الخاصة بك
+    const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("listings");
 
-    // معاينة الصورة وتحويلها لـ Base64
-    let base64Image = "";
-    function preview(input) {
+    // مفتاح ImgBB الذي قدمته
+    const IMGBB_KEY = "095fed96bdc0302b815406d636818189";
+
+    function showPreview(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                base64Image = e.target.result;
-                document.getElementById('innerImg').src = base64Image;
-                document.getElementById('innerImg').style.display = 'block';
-                document.getElementById('pTxt').style.display = 'none';
+            reader.onload = e => {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('txtUpload').style.display = 'none';
             };
             reader.readAsDataURL(input.files[0]);
         }
     }
 
-    // النشر المباشر في قاعدة البيانات
-    function publish() {
-        const title = document.getElementById('pTitle').value;
+    async function startPublish() {
+        const title = document.getElementById('pTitle').value.trim();
         const price = document.getElementById('pPrice').value;
-        const phone = document.getElementById('pPhone').value;
+        const phone = document.getElementById('pPhone').value.trim();
+        const file = document.getElementById('fileInput').files[0];
 
-        if (title && price && phone && base64Image) {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('btnPublish').disabled = true;
+        // التحقق من صحة البيانات (Regex تونسي)
+        if (!/^([2459][0-9]{7})$/.test(phone)) return alert("❌ رقم هاتف تونسي غير صحيح (يجب 8 أرقام)");
+        if (!file || title.length < 3) return alert("❌ يرجى إكمال البيانات واختيار صورة");
 
-            db.push({
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        document.getElementById('publishBtn').disabled = true;
+
+        try {
+            // 1. رفع الصورة إلى ImgBB (خارج Firebase لتجاوز القيود المالية)
+            const formData = new FormData();
+            formData.append("image", file);
+            
+            const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+                method: "POST",
+                body: formData
+            });
+            const imgData = await imgRes.json();
+            const finalImageUrl = imgData.data.url;
+
+            // 2. حفظ الرابط والبيانات في Firebase Database
+            await db.push({
                 title, price, phone,
-                img: base64Image, // تخزين الصورة كنص
+                imgUrl: finalImageUrl,
                 time: Date.now()
-            }).then(() => {
-                alert("تم النشر بنجاح!");
-                location.reload();
-            }).catch(err => alert("خطأ: " + err.message));
-        } else {
-            alert("يرجى إكمال البيانات والصورة");
+            });
+
+            alert("✅ تم النشر باحترافية!");
+            location.reload();
+        } catch (err) {
+            alert("❌ فشل الرفع: " + err.message);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('publishBtn').disabled = false;
         }
     }
 
-    // عرض الإعلانات
+    // جلب البيانات وعرضها
     db.on("value", (snap) => {
         const market = document.getElementById('market');
         market.innerHTML = "";
-        let items = [];
-        snap.forEach(child => { items.unshift({id: child.key, ...child.val()}); });
+        let list = [];
+        snap.forEach(c => list.unshift({id: c.key, ...c.val()}));
 
-        items.forEach(p => {
+        list.forEach(p => {
             market.innerHTML += `
                 <div class="card">
-                    <img src="${p.img}">
+                    <img src="${p.imgUrl}">
                     <div class="info">
                         <p class="price">${p.price} د.ت</p>
                         <p class="title">${p.title}</p>
@@ -132,11 +149,10 @@
         });
     });
 
-    function adminAccess() {
-        const pass = prompt("كلمة السر:");
-        if (pass === "malik2026") {
-            const id = prompt("أدخل معرف الإعلان لحذفه (يمكنك رؤيته في Firebase):");
-            if(id) db.child(id).remove();
+    function adminControl() {
+        if (prompt("كلمة السر:") === "malik2026") {
+            const id = prompt("أدخل كود الإعلان للحذف:");
+            if (id) db.child(id).remove();
         }
     }
 </script>
