@@ -14,7 +14,8 @@
         .pub-btn { background-color: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 60%; transition: 0.3s; }
         .pub-btn:hover { background-color: #218838; }
         .listings-title { margin-top: 40px; font-weight: bold; }
-        .card { background: white; border-radius: 12px; padding: 15px; margin: 15px; width: 280px; display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: right; }
+        #listings-grid { display: flex; flex-wrap: wrap; justify-content: center; min-height: 200px; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin: 15px; width: 280px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: right; }
         .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
         .del-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
     </style>
@@ -36,7 +37,7 @@
     <div id="listings-grid">جاري التحميل...</div>
 
     <script>
-        // 1. إعدادات Firebase الخاصة بك (تأكد من مطابقتها لمشروعك)
+        // 1. إعدادات Firebase الخاصة بمشروعك
         const firebaseConfig = {
             apiKey: "AIzaSy...", 
             databaseURL: "https://votre-projet.firebaseio.com",
@@ -47,7 +48,7 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // 2. تسجيل دخول المدير (مالك) تلقائياً لإظهار أزرار الحذف
+        // 2. تسجيل دخول المدير (تلقائياً لك فقط)
         auth.signInWithEmailAndPassword("malikhammami0@gmail.com", "@15309025@")
             .then(() => console.log("وضع المدير مفعل ✅"))
             .catch(() => console.log("تصفح زائر"));
@@ -69,7 +70,7 @@
             formData.append("image", file);
             
             try {
-                // رفع الصورة لـ ImgBB (مجاني)
+                // رفع الصورة لـ ImgBB
                 const res = await fetch("https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189", {
                     method: "POST",
                     body: formData
@@ -91,16 +92,22 @@
                 document.getElementById('pPhone').value = "";
             } catch (err) {
                 msg.style.color = "red";
-                msg.innerText = "❌ خطأ: " + err.message;
+                msg.innerText = "❌ خطأ في النشر: " + err.message;
             } finally {
                 btn.disabled = false;
             }
         }
 
-        // 4. عرض الإعلانات مع ميزة الحذف لمالك فقط
+        // 4. عرض الإعلانات وحل مشكلة "جاري التحميل"
         db.ref('listings').on('value', (snapshot) => {
             const grid = document.getElementById('listings-grid');
-            grid.innerHTML = "";
+            grid.innerHTML = ""; // مسح رسالة التحميل فور وصول البيانات
+            
+            if (!snapshot.exists()) {
+                grid.innerHTML = "<p>لا توجد إعلانات حالياً. كن أول من ينشر!</p>";
+                return;
+            }
+
             const isManager = auth.currentUser && auth.currentUser.email === "malikhammami0@gmail.com";
 
             snapshot.forEach((child) => {
@@ -114,8 +121,11 @@
                     </div>
                 `;
             });
+        }, (error) => {
+            document.getElementById('listings-grid').innerHTML = "فشل في تحميل الإعلانات.";
         });
 
+        // 5. وظيفة الحذف (للمدير فقط)
         function deleteItem(id) {
             if (confirm("هل تريد حذف هذا الإعلان؟")) {
                 db.ref('listings/' + id).remove();
