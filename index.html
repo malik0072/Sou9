@@ -3,171 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سوق المزرعة - تواصل مباشر</title>
+    <title>سوق المزرعة - النسخة المضمونة</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #2e7d32; --accent: #42b72a; --bg: #f0f2f5; --text: #1c1e21; }
+        :root { --primary: #2e7d32; --accent: #42b72a; --bg: #f0f2f5; }
         * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); margin: 0; padding: 10px; }
         
-        /* الهيدر والبحث */
-        .header { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h1 { color: var(--primary); margin: 0 0 10px; font-size: 22px; text-align: center; cursor: pointer; }
-        .search-bar { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; background: #f0f2f5; text-align: right; margin-bottom: 12px; outline: none; font-size: 14px; }
-
-        .categories { display: flex; gap: 8px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
-        .cat-btn { background: white; border: 1px solid #ddd; padding: 8px 18px; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        /* الهيدر */
+        .header { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
+        h1 { color: var(--primary); margin: 0; font-size: 22px; cursor: pointer; }
 
         /* نموذج الإضافة */
         .post-box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ddd; }
         input, select { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 8px; background: #f5f6f7; font-size: 14px; }
-        .btn-main { background: var(--accent); color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 5px; }
+        .btn-main { background: var(--accent); color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        /* عرض المنتجات */
-        #market { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 800px; margin: auto; }
-        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; position: relative; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .img-holder { width: 100%; padding-top: 100%; position: relative; background: #eee; }
-        .img-holder img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; }
-        
-        .info { padding: 10px; flex-grow: 1; text-align: right; }
+        /* معاينة الصورة */
+        .img-preview { width: 100%; height: 150px; background: #eee; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #ccc; }
+        .img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        /* شبكة المنتجات */
+        #market { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; display: flex; flex-direction: column; }
+        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        .info { padding: 10px; flex-grow: 1; }
         .price { font-size: 17px; font-weight: bold; color: var(--primary); margin: 0; }
-        .title { font-size: 14px; color: #1c1e21; margin: 4px 0; height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-        .location { font-size: 12px; color: #65676b; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+        .title { font-size: 14px; margin: 4px 0; font-weight: 500; }
 
-        /* أزرار التواصل المباشر */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px 10px; }
-        .btn-call { background: #1877f2; color: white; text-decoration: none; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        /* أزرار التواصل */
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px; }
+        .btn-call { background: #1877f2; color: white; text-decoration: none; padding: 8px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; }
+        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 8px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; }
         
-        .admin-del { position: absolute; top: 8px; left: 8px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: none; z-index: 10; cursor: pointer; font-weight: bold; }
-        .badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+        #loading { display: none; text-align: center; color: var(--primary); font-weight: bold; margin: 10px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1 onclick="activateAdmin()">🐣 سوق المزرعة</h1>
-    <input type="text" class="search-bar" id="searchInput" placeholder="ابحث عن: علوش، دجاج، جرار..." onkeyup="search()">
-    <div class="categories">
-        <button class="cat-btn active" onclick="filter('all')">الكل</button>
-        <button class="cat-btn" onclick="filter('دواجن')">دواجن</button>
-        <button class="cat-btn" onclick="filter('مواشي')">مواشي</button>
-        <button class="cat-btn" onclick="filter('أعلاف')">أعلاف</button>
-        <button class="cat-btn" onclick="filter('معدات')">معدات</button>
-    </div>
+    <h1 onclick="adminAccess()">🐣 سوق المزرعة</h1>
 </div>
 
 <div class="post-box">
-    <input type="text" id="pTitle" placeholder="عنوان العرض">
-    <select id="pCat">
-        <option value="دواجن">دواجن</option>
-        <option value="مواشي">مواشي</option>
-        <option value="أعلاف">أعلاف</option>
-        <option value="معدات">معدات</option>
-    </select>
+    <input type="text" id="pTitle" placeholder="عنوان العرض (مثلاً: دجاج عربي)">
     <input type="number" id="pPrice" placeholder="السعر (د.ت)">
-    <input type="tel" id="pPhone" placeholder="رقم الهاتف (دون فراغات)">
-    <input type="text" id="pLoc" placeholder="الولاية / المدينة">
-    <input type="file" id="pImg" accept="image/*">
-    <button class="btn-main" onclick="publish()">نشر العرض الآن</button>
+    <input type="tel" id="pPhone" placeholder="رقم الهاتف">
+    
+    <div class="img-preview" onclick="document.getElementById('pImg').click()">
+        <span id="pTxt">اضغط لإضافة صورة</span>
+        <img id="innerImg">
+    </div>
+    <input type="file" id="pImg" accept="image/*" style="display:none" onchange="preview(this)">
+    
+    <div id="loading">جاري النشر...</div>
+    <button class="btn-main" id="btnPublish" onclick="publish()">انشر الآن ✅</button>
 </div>
 
 <div id="market"></div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
+    // إعدادات Firebase الخاصة بك (قاعدة البيانات فقط)
+    const firebaseConfig = { 
+        databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" 
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("listings");
 
-    let isAdmin = false;
-    let currentDataSnap;
-
-    function activateAdmin() {
-        const pass = prompt("كلمة سر الإدارة:");
-        if (pass === "malik2026") {
-            isAdmin = true;
-            alert("تم تفعيل وضع الإدارة.");
-            render(currentDataSnap);
+    // معاينة الصورة وتحويلها لـ Base64
+    let base64Image = "";
+    function preview(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                base64Image = e.target.result;
+                document.getElementById('innerImg').src = base64Image;
+                document.getElementById('innerImg').style.display = 'block';
+                document.getElementById('pTxt').style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     }
 
+    // النشر المباشر في قاعدة البيانات
     function publish() {
         const title = document.getElementById('pTitle').value;
-        const cat = document.getElementById('pCat').value;
         const price = document.getElementById('pPrice').value;
         const phone = document.getElementById('pPhone').value;
-        const loc = document.getElementById('pLoc').value;
-        const file = document.getElementById('pImg').files[0];
 
-        if (file && title && price && phone) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                db.push({ title, cat, price, phone, loc, img: e.target.result, time: Date.now() });
+        if (title && price && phone && base64Image) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('btnPublish').disabled = true;
+
+            db.push({
+                title, price, phone,
+                img: base64Image, // تخزين الصورة كنص
+                time: Date.now()
+            }).then(() => {
                 alert("تم النشر بنجاح!");
                 location.reload();
-            };
-            reader.readAsDataURL(file);
-        } else { alert("يرجى إدخال كافة المعلومات"); }
+            }).catch(err => alert("خطأ: " + err.message));
+        } else {
+            alert("يرجى إكمال البيانات والصورة");
+        }
     }
 
-    function render(snapshot, filterCat = 'all', searchTerm = '') {
+    // عرض الإعلانات
+    db.on("value", (snap) => {
         const market = document.getElementById('market');
         market.innerHTML = "";
         let items = [];
-        
-        snapshot.forEach(child => {
-            const val = child.val();
-            const matchesCat = (filterCat === 'all' || val.cat === filterCat);
-            const matchesSearch = val.title.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            if (matchesCat && matchesSearch) {
-                items.unshift({ id: child.key, ...val });
-            }
-        });
+        snap.forEach(child => { items.unshift({id: child.key, ...child.val()}); });
 
         items.forEach(p => {
-            const cleanPhone = p.phone.replace(/\D/g, ''); // تنظيف الرقم تماماً
-            const waMsg = encodeURIComponent("مرحباً، اتصلت بك بخصوص إعلانك: " + p.title + " في سوق المزرعة.");
             market.innerHTML += `
                 <div class="card">
-                    <button class="admin-del" style="display: ${isAdmin ? 'block' : 'none'}" onclick="deleteItem('${p.id}')">✕</button>
-                    <span class="badge">${p.cat}</span>
-                    <div class="img-holder"><img src="${p.img}"></div>
+                    <img src="${p.img}">
                     <div class="info">
                         <p class="price">${p.price} د.ت</p>
                         <p class="title">${p.title}</p>
-                        <p class="location">📍 ${p.loc || 'تونس'}</p>
                     </div>
                     <div class="actions">
-                        <a href="tel:${cleanPhone}" class="btn-call">اتصال</a>
-                        <a href="https://wa.me/216${cleanPhone}?text=${waMsg}" class="btn-wa">واتساب</a>
+                        <a href="tel:${p.phone}" class="btn-call">اتصال</a>
+                        <a href="https://wa.me/216${p.phone}" class="btn-wa">واتساب</a>
                     </div>
                 </div>`;
         });
-    }
-
-    function search() {
-        const term = document.getElementById('searchInput').value;
-        render(currentDataSnap, 'all', term);
-    }
-
-    function filter(category) {
-        document.querySelectorAll('.cat-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.innerText === category || (category === 'all' && btn.innerText === 'الكل'));
-        });
-        render(currentDataSnap, category);
-    }
-
-    function deleteItem(id) {
-        if (confirm("حذف الإعلان؟")) { db.child(id).remove(); }
-    }
-
-    db.on("value", (snap) => { 
-        currentDataSnap = snap; 
-        render(snap); 
     });
+
+    function adminAccess() {
+        const pass = prompt("كلمة السر:");
+        if (pass === "malik2026") {
+            const id = prompt("أدخل معرف الإعلان لحذفه (يمكنك رؤيته في Firebase):");
+            if(id) db.child(id).remove();
+        }
+    }
 </script>
 </body>
 </html>
