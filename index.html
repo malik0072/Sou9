@@ -50,6 +50,7 @@ let ads = [];
 // كود المدير مخفي
 const ADMIN_CODE = "@15309025@";
 
+// ضغط الصورة قبل الرفع
 async function compress(file) {
     return new Promise(res => {
         const reader = new FileReader();
@@ -60,7 +61,7 @@ async function compress(file) {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const maxWidth = 500;
-                if(img.width > maxWidth) {
+                if(img.width > maxWidth){
                     canvas.width = maxWidth;
                     canvas.height = img.height * (maxWidth / img.width);
                 } else {
@@ -68,12 +69,13 @@ async function compress(file) {
                     canvas.height = img.height;
                 }
                 canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-                canvas.toBlob(blob => res(blob), 'image/jpeg', 0.6);
+                canvas.toBlob(blob => res(blob),'image/jpeg',0.6);
             }
         }
     });
 }
 
+// نشر الإعلان
 async function publishAd() {
     const title = document.getElementById('t').value;
     const price = document.getElementById('pr').value;
@@ -82,14 +84,17 @@ async function publishAd() {
     if(!title || !price || !phone || !file) return alert("أكمل البيانات!");
 
     const btn = document.getElementById('btn');
-    btn.disabled = true; btn.innerText="⏳ جاري الرفع...";
+    btn.disabled=true; btn.innerText="⏳ جاري الرفع...";
 
     try {
         const blob = await compress(file);
         const fd = new FormData();
         fd.append('image', blob);
-        const res = await fetch('https://api.imgbb.com/1/upload?key=67f677d3326f53e5e419842f1f531398', { method:'POST', body:fd });
+
+        // استخدام المفتاح الجديد
+        const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{ method:'POST', body:fd });
         const data = await res.json();
+
         if(data.success){
             const deleteCode = Math.random().toString(36).substring(7).toUpperCase();
             const ref = await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:deleteCode });
@@ -97,10 +102,14 @@ async function publishAd() {
             alert("✅ تم! كود الحذف: "+deleteCode);
             location.reload();
         } else throw new Error();
-    } catch(e){ alert("❌ خطأ! جرب صورة أخرى"); btn.disabled=false; btn.innerText="نشر الإعلان"; }
+    } catch(e){
+        alert("❌ خطأ! جرب صورة أخرى");
+        btn.disabled=false; btn.innerText="نشر الإعلان";
+    }
 }
 
-db.ref('listings').on('value', snapshot => {
+// قراءة الإعلانات وعرضها
+db.ref('listings').on('value', snapshot=>{
     ads=[];
     const data = snapshot.val();
     if(data) Object.entries(data).reverse().forEach(([id,a])=>ads.push({id,...a}));
@@ -119,19 +128,22 @@ function renderAds(data){
     </div>`).join('');
 }
 
+// البحث في الإعلانات
 function filterAds(){
     const term = document.getElementById('searchInput').value.toLowerCase();
     renderAds(ads.filter(a=>a.t.toLowerCase().includes(term)));
 }
 
+// حذف الإعلان
 function delAd(id, code){
     const input = prompt("كود الحذف أو المدير:");
-    if(input === code || input === ADMIN_CODE) db.ref('listings/'+id).remove();
+    if(input===code || input===ADMIN_CODE) db.ref('listings/'+id).remove();
 }
 
+// إحصائيات المدير
 function checkAdmin(){
     const input = prompt("كود المدير:");
-    if(input === ADMIN_CODE) alert("📊 عدد الإعلانات: "+ads.length);
+    if(input===ADMIN_CODE) alert("📊 عدد الإعلانات: "+ads.length);
 }
 </script>
 </body>
