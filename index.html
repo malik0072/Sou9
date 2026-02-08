@@ -2,159 +2,126 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سوق المزرعة - النسخة الاحترافية</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <style>
-        :root { --primary: #2e7d32; --accent: #43a047; --bg: #f0f2f5; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        
-        /* الهيدر */
-        .header { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
-        h1 { color: var(--primary); margin: 0; font-size: 24px; cursor: pointer; }
-
-        /* نموذج الإضافة */
-        .post-box { background: white; padding: 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ddd; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; font-size: 15px; }
-        .btn-main { background: var(--accent); color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn-main:disabled { background: #ccc; }
-
-        /* معاينة الصورة */
-        .img-area { width: 100%; height: 160px; background: #fdfdfd; border: 2px dashed #bbb; border-radius: 10px; margin: 10px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; }
-        .img-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        
-        /* شبكة العرض */
-        #market { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 800px; margin: auto; }
-        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; display: flex; flex-direction: column; position: relative; }
-        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #eee; }
-        .info { padding: 10px; flex-grow: 1; }
-        .price { font-size: 18px; font-weight: 800; color: var(--primary); margin: 0; }
-        .title { font-size: 14px; margin: 5px 0; color: #333; height: 18px; overflow: hidden; text-overflow: ellipsis; }
-
-        /* أزرار التواصل */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; background: #f8f9fa; }
-        .btn-call { background: #007bff; color: white; text-decoration: none; padding: 9px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: bold; }
-        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 9px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: bold; }
-
-        #loadingOverlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:1000; justify-content:center; align-items:center; flex-direction:column; font-weight:bold; color:var(--primary); }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوق المزرعة - تونس</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 </head>
 <body>
 
-<div id="loadingOverlay">جاري رفع الإعلان... ⏳</div>
+    <h1 style="color: #2c3e50;">🚜 سوق المزرعة</h1>
 
-<div class="header">
-    <h1 onclick="adminControl()">🐣 سوق المزرعة</h1>
-</div>
-
-<div class="post-box">
-    <input type="text" id="pTitle" placeholder="عنوان الإعلان (مثلاً: علوش ممتاز)">
-    <input type="number" id="pPrice" placeholder="السعر (د.ت)">
-    <input type="tel" id="pPhone" placeholder="رقم الهاتف التونسي (8 أرقام)">
-    
-    <div class="img-area" onclick="document.getElementById('fileInput').click()">
-        <span id="txtUpload">📸 اضغط لإضافة صورة</span>
-        <img id="previewImg">
+    <div id="publish-section" style="border: 2px solid #28a745; padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
+        <h3>إضافة إعلان جديد (مجاني)</h3>
+        <input type="text" id="pTitle" placeholder="ماذا تبيع؟ (مثلاً: علوش بركي)">
+        <input type="text" id="pPhone" placeholder="رقم الهاتف (تونس)">
+        <input type="file" id="pFile" accept="image/*">
+        <button id="pubBtn" onclick="handlePublish()">نشر الإعلان الآن</button>
+        <p id="status" style="font-weight: bold;"></p>
     </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="showPreview(this)">
-    
-    <button class="btn-main" id="publishBtn" onclick="startPublish()">نشر العرض الآن 🚀</button>
-</div>
 
-<div id="market"></div>
+    <hr>
 
-<script>
-    // إعدادات Firebase الخاصة بك
-    const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database().ref("listings");
+    <h3 style="text-align: right; padding-right: 10%;">الإعلانات المتوفرة:</h3>
+    <div id="listings-container" style="display: flex; flex-wrap: wrap; justify-content: center;">جاري التحميل...</div>
 
-    // مفتاح ImgBB الذي قدمته
-    const IMGBB_KEY = "095fed96bdc0302b815406d636818189";
+    <script>
+        // 1. إعدادات Firebase (تأكد من مطابقتها لمشروعك)
+        const firebaseConfig = {
+            apiKey: "AIzaSy...", 
+            databaseURL: "https://votre-projet.firebaseio.com",
+            projectId: "votre-projet-id",
+            appId: "1:..."
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
 
-    function showPreview(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                document.getElementById('previewImg').src = e.target.result;
-                document.getElementById('previewImg').style.display = 'block';
-                document.getElementById('txtUpload').style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+        // 2. تسجيل دخولك كمدير (تلقائياً) لإظهار زر الحذف لك وحدك
+        auth.signInWithEmailAndPassword("malikhammami0@gmail.com", "@15309025@")
+            .then(() => console.log("مرحباً مالك! أنت الآن في وضع المدير ✅"))
+            .catch((e) => console.log("تصفح عام (بدون صلاحيات حذف)"));
 
-    async function startPublish() {
-        const title = document.getElementById('pTitle').value.trim();
-        const price = document.getElementById('pPrice').value;
-        const phone = document.getElementById('pPhone').value.trim();
-        const file = document.getElementById('fileInput').files[0];
+        // 3. دالة النشر (مفتوحة للجميع) باستخدام ImgBB
+        async function handlePublish() {
+            const file = document.getElementById('pFile').files[0];
+            const title = document.getElementById('pTitle').value;
+            const phone = document.getElementById('pPhone').value;
+            const status = document.getElementById('status');
+            const btn = document.getElementById('pubBtn');
 
-        // التحقق من صحة البيانات (Regex تونسي)
-        if (!/^([2459][0-9]{7})$/.test(phone)) return alert("❌ رقم هاتف تونسي غير صحيح (يجب 8 أرقام)");
-        if (!file || title.length < 3) return alert("❌ يرجى إكمال البيانات واختيار صورة");
+            if (!file || !title || !phone) return alert("الرجاء إكمال البيانات");
 
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        document.getElementById('publishBtn').disabled = true;
+            status.innerText = "جاري رفع الصورة... انتظر قليلاً";
+            btn.disabled = true;
 
-        try {
-            // 1. رفع الصورة إلى ImgBB (خارج Firebase لتجاوز القيود المالية)
             const formData = new FormData();
             formData.append("image", file);
             
-            const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-                method: "POST",
-                body: formData
-            });
-            const imgData = await imgRes.json();
-            const finalImageUrl = imgData.data.url;
+            try {
+                // رفع الصورة لـ ImgBB لتجنب تكاليف Firebase Storage
+                const res = await fetch("https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189", {
+                    method: "POST",
+                    body: formData
+                });
+                const json = await res.json();
+                const imgUrl = json.data.url;
 
-            // 2. حفظ الرابط والبيانات في Firebase Database
-            await db.push({
-                title, price, phone,
-                imgUrl: finalImageUrl,
-                time: Date.now()
-            });
+                // إرسال البيانات لقاعدة البيانات المجانية
+                await db.ref('listings').push({
+                    title: title,
+                    phone: phone,
+                    img: imgUrl,
+                    createdAt: Date.now()
+                });
 
-            alert("✅ تم النشر باحترافية!");
-            location.reload();
-        } catch (err) {
-            alert("❌ فشل الرفع: " + err.message);
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('publishBtn').disabled = false;
+                status.innerText = "✅ تم النشر بنجاح!";
+                document.getElementById('pTitle').value = "";
+                document.getElementById('pPhone').value = "";
+            } catch (err) {
+                status.innerText = "❌ حدث خطأ: " + err.message;
+            } finally {
+                btn.disabled = false;
+            }
         }
-    }
 
-    // جلب البيانات وعرضها
-    db.on("value", (snap) => {
-        const market = document.getElementById('market');
-        market.innerHTML = "";
-        let list = [];
-        snap.forEach(c => list.unshift({id: c.key, ...c.val()}));
+        // 4. عرض البيانات وتفعيل زر الحذف لمالك فقط
+        db.ref('listings').on('value', (snapshot) => {
+            const container = document.getElementById('listings-container');
+            container.innerHTML = "";
+            const currentUser = auth.currentUser;
 
-        list.forEach(p => {
-            market.innerHTML += `
-                <div class="card">
-                    <img src="${p.imgUrl}">
-                    <div class="info">
-                        <p class="price">${p.price} د.ت</p>
-                        <p class="title">${p.title}</p>
+            snapshot.forEach((child) => {
+                const data = child.val();
+                const id = child.key;
+
+                container.innerHTML += `
+                    <div style="border:1px solid #ddd; margin:10px; padding:15px; border-radius:8px; width:250px; background:#fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <img src="${data.img}" style="width:100%; border-radius:5px;"><br>
+                        <h4 style="margin:10px 0;">${data.title}</h4>
+                        <p>📞 الهاتف: <a href="tel:${data.phone}">${data.phone}</a></p>
+                        ${currentUser && currentUser.email === "malikhammami0@gmail.com" 
+                            ? `<button onclick="deleteItem('${id}')" style="background:red; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">حذف الإعلان 🗑️</button>` 
+                            : ""}
                     </div>
-                    <div class="actions">
-                        <a href="tel:${p.phone}" class="btn-call">اتصال</a>
-                        <a href="https://wa.me/216${p.phone}" class="btn-wa">واتساب</a>
-                    </div>
-                </div>`;
+                `;
+            });
         });
-    });
 
-    function adminControl() {
-        if (prompt("كلمة السر:") === "malik2026") {
-            const id = prompt("أدخل كود الإعلان للحذف:");
-            if (id) db.child(id).remove();
+        // 5. وظيفة الحذف (مقفولة بقواعد الحماية للمدير فقط)
+        function deleteItem(id) {
+            if (confirm("هل تريد حذف هذا الإعلان؟")) {
+                db.ref('listings/' + id).remove();
+            }
         }
-    }
-</script>
+    </script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; text-align: center; }
+        input { display: block; margin: 10px auto; padding: 10px; width: 90%; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 12px 25px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #ccc; }
+    </style>
 </body>
 </html>
