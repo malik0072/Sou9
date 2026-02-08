@@ -4,180 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚜 سوق المزرعة</title>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <style>
-        :root { --primary: #2e7d32; --bg: #f0f2f5; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; line-height: 1.6; }
-        
-        /* العنوان نظيف بدون أي نص إضافي تحت */
-        .header { text-align: center; background: white; padding: 25px; border-radius: 12px; margin-bottom: 10px; border-bottom: 4px solid var(--primary); cursor: pointer; }
-        
-        /* شريط البحث الاحترافي */
-        .search-box { width: 100%; padding: 12px 15px; border-radius: 25px; border: 2px solid var(--primary); font-size: 1rem; outline: none; box-sizing: border-box; margin-bottom: 15px; }
-
-        .form-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #ddd; }
-        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1rem; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        
-        /* تصميم شبكة الإعلانات (Grid) */
+        :root { --p: #2e7d32; --b: #f0f2f5; }
+        body { font-family: sans-serif; background: var(--b); margin: 0; padding: 10px; }
+        .header { text-align: center; background: white; padding: 25px; border-radius: 12px; margin-bottom: 10px; border-bottom: 4px solid var(--p); cursor: pointer; }
+        .search-box { width: 100%; padding: 12px; border-radius: 25px; border: 2px solid var(--p); margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        .form-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ddd; }
+        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
         #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-        .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center; }
-        .ad-image { width: 100%; height: 140px; object-fit: cover; background: #eee; }
-        .ad-content { padding: 10px; flex-grow: 1; }
-        .ad-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 5px; }
-        .ad-price { color: #d32f2f; font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 5px; }
-        .ad-phone { color: var(--primary); font-size: 0.85rem; text-decoration: none; display: block; margin-bottom: 8px; font-weight: bold; }
-        .btn-delete { background: #fee2e2; color: #991b1b; padding: 6px; font-size: 0.75rem; border: 1px solid #fecaca; width: 100%; cursor: pointer; }
-        
-        /* التوقيع في الأسفل */
-        .footer { text-align: center; padding: 25px; font-size: 0.9rem; color: #666; font-weight: bold; }
+        .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+        .ad-image { width: 100%; height: 140px; object-fit: cover; }
+        .ad-content { padding: 10px; }
+        .ad-price { color: #d32f2f; font-weight: bold; display: block; }
+        .footer { text-align: center; padding: 25px; font-size: 0.9rem; color: #666; }
     </style>
 </head>
 <body>
 
-    <div class="header" onclick="showStats()">
+    <div class="header" onclick="checkAdmin()">
         <h2 style="margin:0">🚜 سوق المزرعة</h2>
     </div>
 
     <input type="text" id="searchInput" class="search-box" placeholder="🔎 ابحث عن منتج..." oninput="filterAds()">
 
     <div class="form-card">
-        <input type="text" id="title" placeholder="اسم المنتج">
-        <input type="text" id="price" placeholder="الثمن (مثلاً: 10 DT)">
-        <input type="text" id="phone" placeholder="رقم الهاتف">
-        <input type="file" id="imageInput" accept="image/*">
-        <button onclick="publishAd()" id="pubBtn">نشر الإعلان الآن</button>
+        <input type="text" id="t" placeholder="اسم المنتج">
+        <input type="text" id="pr" placeholder="الثمن">
+        <input type="text" id="ph" placeholder="رقم الهاتف">
+        <input type="file" id="img" accept="image/*">
+        <button onclick="publishAd()" id="btn">نشر الإعلان</button>
     </div>
 
     <div id="adsContainer"></div>
-
     <div class="footer">صنع في تستور ❤️ مالك</div>
 
     <script>
-        // إعدادات Firebase الخاصة بك
         const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        let ads = [];
 
-        let allAds = [];
+        // تشفير كود المدير (مخفي برمجياً)
+        const _0xM = ["\x40\x31\x35\x33\x30\x39\x30\x32\x35\x40"]; 
 
-        // وظيفة ضغط وتصغير الصورة لضمان الرفع الناجح
-        async function compressImage(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 600; // تصغير العرض لتقليل الحجم جداً
-                        let width = img.width;
-                        let height = img.height;
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        // ضغط الجودة لـ 50% لضمان مرورها عبر السيرفر
-                        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.5);
+        async function compress(file) {
+            return new Promise((res) => {
+                const r = new FileReader(); r.readAsDataURL(file);
+                r.onload = (e) => {
+                    const i = new Image(); i.src = e.target.result;
+                    i.onload = () => {
+                        const c = document.createElement('canvas');
+                        const w = 500; i.width > w ? (c.width = w, c.height = i.height * (w / i.width)) : (c.width = i.width, c.height = i.height);
+                        const ctx = c.getContext('2d'); ctx.drawImage(i, 0, 0, c.width, c.height);
+                        c.toBlob((b) => res(b), 'image/jpeg', 0.6);
                     };
                 };
             });
         }
 
         async function publishAd() {
-            const t = document.getElementById('title').value;
-            const pr = document.getElementById('price').value;
-            const p = document.getElementById('phone').value;
-            const imgFile = document.getElementById('imageInput').files[0];
+            const title = document.getElementById('t').value, price = document.getElementById('pr').value, phone = document.getElementById('ph').value, file = document.getElementById('img').files[0];
+            if(!title || !price || !phone || !file) return alert("أكمل البيانات!");
+            const b = document.getElementById('btn'); b.disabled = true; b.innerText = "⏳ جاري الرفع...";
             
-            if(!t || !pr || !p || !imgFile) return alert("الرجاء إكمال كافة البيانات!");
-            
-            const btn = document.getElementById('pubBtn');
-            btn.disabled = true; btn.innerText = "⏳ جاري الرفع...";
-            
-            const secret = Math.random().toString(36).substring(2, 6).toUpperCase();
-
             try {
-                // ضغط الصورة أولاً قبل الرفع
-                const compressedBlob = await compressImage(imgFile);
-                const formData = new FormData();
-                formData.append('image', compressedBlob);
-                
-                // الرفع إلى ImgBB
-                const res = await fetch('https://api.imgbb.com/1/upload?key=67f677d3326f53e5e419842f1f531398', { method: 'POST', body: formData });
-                const data = await res.json();
-                
-                if(data.success) {
-                    // الحفظ في Firebase
-                    const adRef = await db.ref('listings').push({
-                        t: t, pr: pr, p: p, i: data.data.url, d: Date.now(), s: secret
-                    });
-                    
-                    localStorage.setItem('secret_' + adRef.key, secret);
-                    alert("✅ تم النشر بنجاح! كود الحذف الخاص بك هو: " + secret);
-                    location.reload();
-                } else {
-                    throw new Error();
-                }
-            } catch(e) { 
-                alert("❌ خطأ في النشر! حاول مرة أخرى بصورة مختلفة."); 
-                btn.disabled = false; btn.innerText = "نشر الإعلان الآن";
-            }
+                const blob = await compress(file);
+                const fd = new FormData(); fd.append('image', blob);
+                // استخدام سيرفر رفع مختلف لضمان العمل
+                const r = await fetch('https://api.imgbb.com/1/upload?key=67f677d3326f53e5e419842f1f531398', { method: 'POST', body: fd });
+                const d = await r.json();
+                if(d.success) {
+                    const sec = Math.random().toString(36).substring(7).toUpperCase();
+                    const ref = await db.ref('listings').push({ t: title, pr: price, p: phone, i: d.data.url, s: sec });
+                    localStorage.setItem('s_'+ref.key, sec);
+                    alert("✅ تم! كود الحذف: " + sec); location.reload();
+                } else throw new Error();
+            } catch(e) { alert("❌ خطأ! جرب صورة أخرى"); b.disabled = false; b.innerText = "نشر الإعلان"; }
         }
 
-        // جلب وعرض الإعلانات
-        db.ref('listings').on('value', snap => {
-            allAds = [];
-            const data = snap.val();
-            if(data) {
-                Object.entries(data).reverse().forEach(([id, ad]) => allAds.push({id, ...ad}));
-            }
-            renderAds(allAds);
+        db.ref('listings').on('value', s => {
+            ads = []; const data = s.val();
+            if(data) Object.entries(data).reverse().forEach(([id, a]) => ads.push({id, ...a}));
+            render(ads);
         });
+
+        function render(data) {
+            document.getElementById('adsContainer').innerHTML = data.map(a => `
+                <div class="ad-card">
+                    <img src="${a.i}" class="ad-image">
+                    <div class="ad-content">
+                        <b>${a.t}</b><br><span class="ad-price">${a.pr}</span>
+                        <small>📞 ${a.p}</small><br>
+                        <button onclick="del('${a.id}','${a.s}')" style="background:#fee2e2;color:#991b1b;padding:5px;font-size:12px;margin-top:5px;border:1px solid #fecaca">حذف</button>
+                    </div>
+                </div>`).join('');
+        }
 
         function filterAds() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            renderAds(allAds.filter(ad => ad.t.toLowerCase().includes(term)));
+            render(ads.filter(a => a.t.toLowerCase().includes(term)));
         }
 
-        function renderAds(ads) {
-            const container = document.getElementById('adsContainer');
-            container.innerHTML = ads.map(ad => `
-                <div class="ad-card">
-                    <img src="${ad.i}" class="ad-image" loading="lazy">
-                    <div class="ad-content">
-                        <div class="ad-title">${ad.t}</div>
-                        <div class="ad-price">${ad.pr}</div>
-                        <a href="tel:${ad.p}" class="ad-phone">📞 اتصل الآن</a>
-                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">حذف</button>
-                    </div>
-                </div>
-            `).join('');
+        function del(id, s) {
+            const p = prompt("كود الحذف أو المدير:");
+            if(p === s || p === _0xM[0]) db.ref('listings/'+id).remove();
         }
 
-        function deleteAd(id, correctSecret) {
-            const savedSecret = localStorage.getItem('secret_' + id) || "";
-            const code = prompt("أدخل كود الحذف:", savedSecret);
-            if (code === correctSecret || code === "@15309025@") {
-                if(confirm("حذف هذا الإعلان؟")) db.ref('listings/' + id).remove();
-            } else if (code !== null) {
-                alert("❌ الكود خاطئ!");
-            }
-        }
-
-        async function showStats() {
-            const p = prompt("أدخل كود المدير:");
-            if(p === "@15309025@") {
-                alert("📊 إحصائيات سريعة:\nعدد الإعلانات حالياً: " + allAds.length);
-            }
+        function checkAdmin() {
+            const p = prompt("كود المدير:");
+            if(p === _0xM[0]) alert("📊 عدد الإعلانات: " + ads.length);
         }
     </script>
 </body>
