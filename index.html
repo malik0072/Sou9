@@ -3,50 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚜 سوق المزرعة - أول سوق حرة في تونس</title>
-    <meta name="description" content="سوق المزرعة - منصة تونسية حرة من تستور لبيع وشراء المنتجات الفلاحية والمواشي بدون حساب أو كلمة سر.">
-    <meta name="keywords" content="سوق المزرعة, فلاحة تونس, تستور, بيع علوش, معدات فلاحية, تونس, مالك تستور">
+    <title>🚜 سوق المزرعة - تستور</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNNF8Z3H7S"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-LNNF8Z3H7S');
-    </script>
-
+    
     <style>
-        :root { --primary: #2e7d32; --secondary: #f1f8e9; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fafafa; margin: 0; padding: 10px; }
-        .header { text-align: center; background: #ddd; padding: 20px; border-radius: 15px; margin-bottom: 20px; cursor: pointer; }
-        .search-box { width: 100%; padding: 12px; border: 2px solid var(--primary); border-radius: 25px; margin-bottom: 20px; box-sizing: border-box; }
-        .form-card { background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--primary); margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .ad-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #eee; }
-        .ad-image { width: 100%; height: 250px; object-fit: cover; }
-        .ad-content { padding: 15px; }
-        .ad-price { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
-        .btn-delete { background: #d32f2f; margin-top: 10px; }
-        .footer { text-align: center; padding: 20px; font-size: 0.9rem; color: #666; }
+        :root { --primary: #2e7d32; --bg: #f4f4f4; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        
+        .header { text-align: center; background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; border-bottom: 4px solid var(--primary); }
+        
+        .search-box { width: 100%; padding: 12px; border: 2px solid var(--primary); border-radius: 25px; margin-bottom: 15px; outline: none; }
+        
+        .form-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #ddd; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+
+        /* تنسيق الإعلانات الجديد ليكون أصغر وأجمل */
+        #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        
+        .ad-card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #eee; }
+        
+        /* تحديد حجم الصورة لكي لا تصبح كبيرة جداً */
+        .ad-image { width: 100%; height: 150px; object-fit: cover; background: #eee; }
+        
+        .ad-content { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .ad-title { font-size: 0.95rem; margin: 0; font-weight: bold; color: #333; height: 40px; overflow: hidden; }
+        .ad-phone { color: var(--primary); font-size: 0.85rem; font-weight: bold; margin: 5px 0; }
+        
+        .btn-delete { background: #ffeded; color: #d32f2f; padding: 6px; font-size: 0.8rem; border: 1px solid #ffcdd2; margin-top: 5px; }
+        
+        .footer { text-align: center; padding: 20px; font-size: 0.8rem; color: #777; }
     </style>
 </head>
 <body>
 
     <div class="header" onclick="showStats()">
-        <h1>🚜 سوق المزرعة</h1>
+        <h2 style="margin:0">🚜 سوق المزرعة</h2>
+        <small>من قلب تستور لكل تونس</small>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن منتج..." oninput="searchAds()">
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن منتج..." oninput="searchAds()">
 
     <div class="form-card">
-        <h3>نشر إعلان جديد (مجاني)</h3>
-        <input type="text" id="title" placeholder="عنوان الإعلان (مثلاً: علوش صردي)">
+        <input type="text" id="title" placeholder="عنوان الإعلان (مثلاً: رمان تستور)">
         <input type="text" id="phone" placeholder="رقم الهاتف">
-        <input type="file" id="imageInput" accept="image/*">
-        <button onclick="publishAd()" id="pubBtn">نشر الإعلان الآن</button>
+        <input type="file" id="imageInput" accept="image/*" style="font-size: 0.8rem;">
+        <button onclick="publishAd()" id="pubBtn">انشر إعلاني مجاناً</button>
     </div>
 
     <div id="adsContainer"></div>
@@ -56,48 +60,35 @@
     </div>
 
     <script>
-        // إعدادات Firebase الخاصة بمشروع Sou9
-        const firebaseConfig = {
-            databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/"
-        };
+        const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let allAds = [];
 
-        // عداد الزيارات التلقائي عند التحميل
+        // إحصائيات الزيارات
         db.ref('stats/visits').transaction(c => (c || 0) + 1);
 
-        // وظيفة النشر
         async function publishAd() {
             const t = document.getElementById('title').value;
             const p = document.getElementById('phone').value;
             const imgFile = document.getElementById('imageInput').files[0];
-            const btn = document.getElementById('pubBtn');
-
-            if(!t || !p || !imgFile) return alert("الرجاء ملء كل الخانات!");
+            if(!t || !p || !imgFile) return alert("أكمل البيانات أولاً!");
             
+            const btn = document.getElementById('pubBtn');
             btn.disabled = true; btn.innerText = "جاري الرفع...";
-
             const secret = Math.random().toString(36).substring(2, 6).toUpperCase();
+
             const formData = new FormData();
             formData.append('image', imgFile);
-
             try {
-                const res = await fetch('https://api.imgbb.com/1/upload?key=8730953a9e62340570b5514f76269600', {
-                    method: 'POST', body: formData
-                });
+                const res = await fetch('https://api.imgbb.com/1/upload?key=8730953a9e62340570b5514f76269600', { method: 'POST', body: formData });
                 const data = await res.json();
-                
-                await db.ref('listings').push({
-                    t: t, p: p, i: data.data.url, d: Date.now(), s: secret
-                });
-
-                alert("تم النشر! رمز الحذف الخاص بك هو: " + secret);
+                await db.ref('listings').push({ t, p, i: data.data.url, d: Date.now(), s: secret });
+                alert("✅ تم النشر بنجاح!\nرمز الحذف الخاص بك هو: " + secret);
                 location.reload();
-            } catch(e) { alert("فشل الرفع!"); btn.disabled = false; }
+            } catch(e) { alert("خطأ في الاتصال!"); btn.disabled = false; }
         }
 
-        // جلب الإعلانات وعرضها
         db.ref('listings').on('value', snap => {
             allAds = [];
             const data = snap.val();
@@ -112,39 +103,40 @@
                 <div class="ad-card">
                     <img src="${ad.i}" class="ad-image" loading="lazy">
                     <div class="ad-content">
-                        <h3>${ad.t}</h3>
-                        <p class="ad-price">📞 ${ad.p}</p>
-                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">حذف الإعلان</button>
+                        <p class="ad-title">${ad.t}</p>
+                        <p class="ad-phone">📞 ${ad.p}</p>
+                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">🗑️ حذف</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // محرك البحث الفوري
         function searchAds() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allAds.filter(ad => ad.t.toLowerCase().includes(query));
-            displayAds(filtered);
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            displayAds(allAds.filter(ad => ad.t.toLowerCase().includes(q)));
         }
 
-        // نظام الحذف المزدوج
+        // نظام الحذف مع التأكيد المزدوج
         function deleteAd(id, correctSecret) {
-            const p = prompt("أدخل كود الحذف الخاص بالإعلان (أو كود المدير):");
-            if(p === correctSecret || p === "@15309025@") {
-                if(confirm("هل أنت متأكد من الحذف؟")) {
-                    db.ref('listings/' + id).remove();
+            const code = prompt("أدخل كود الحذف السري (أو كود المدير):");
+            if (code === correctSecret || code === "@15309025@") {
+                // تأكيد إضافي لمنع الحذف بالخطأ
+                const confirmDelete = confirm("⚠️ هل أنت متأكد تماماً من رغبتك في حذف هذا الإعلان نهائياً؟");
+                if (confirmDelete) {
+                    db.ref('listings/' + id).remove()
+                        .then(() => alert("✅ تم حذف الإعلان بنجاح"))
+                        .catch(() => alert("❌ فشل الحذف"));
                 }
-            } else if(p !== null) {
-                alert("الكود خاطئ!");
+            } else if (code !== null) {
+                alert("❌ الكود خاطئ!");
             }
         }
 
-        // لوحة إحصائيات المدير
         async function showStats() {
-            const p = prompt("أدخل كود المدير لرؤية الإحصائيات:");
+            const p = prompt("أدخل كود المدير:");
             if(p === "@15309025@") {
                 const snap = await db.ref('stats/visits').once('value');
-                alert("📊 إحصائيات سوق المزرعة:\n\n📍 عدد الزيارات: " + (snap.val() || 0) + "\n📦 الإعلانات: " + allAds.length);
+                alert("📊 إحصائيات تستور:\nالزيارات: " + (snap.val() || 0) + "\nالإعلانات: " + allAds.length);
             }
         }
     </script>
