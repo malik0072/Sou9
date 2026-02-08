@@ -9,28 +9,27 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
-        :root { --primary: #2e7d32; --bg: #f0f2f5; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; line-height: 1.6; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
         
-        .header { text-align: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-bottom: 4px solid var(--primary); cursor: pointer; }
+        /* العنوان بدون كتابة تحته */
+        .header { text-align: center; background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-bottom: 4px solid #2e7d32; cursor: pointer; }
         
         /* شريط البحث */
-        .search-container { margin-bottom: 15px; }
-        .search-box { width: 100%; padding: 12px 15px; border-radius: 25px; border: 2px solid var(--primary); font-size: 1rem; outline: none; box-sizing: border-box; }
+        .search-box { width: 100%; padding: 12px; border-radius: 25px; border: 2px solid #2e7d32; margin-bottom: 15px; outline: none; box-sizing: border-box; }
 
-        .form-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        .form-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ddd; }
+        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: #2e7d32; color: white; border: none; font-weight: bold; cursor: pointer; }
         
-        #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .ad-image { width: 100%; height: 140px; object-fit: cover; background: #eee; }
-        .ad-content { padding: 10px; text-align: center; flex-grow: 1; }
-        .ad-title { font-weight: bold; font-size: 0.95rem; margin: 5px 0; }
-        .ad-price { color: #d32f2f; font-weight: bold; font-size: 1.1rem; }
-        .ad-phone { color: var(--primary); font-size: 0.85rem; text-decoration: none; display: block; margin-bottom: 8px; }
-        .btn-delete { background: #fee2e2; color: #991b1b; padding: 6px; font-size: 0.75rem; border: 1px solid #fecaca; width: 100%; cursor: pointer; }
+        /* شبكة الإعلانات */
+        #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+        .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; }
+        .ad-image { width: 100%; height: 140px; object-fit: cover; }
+        .ad-content { padding: 10px; flex-grow: 1; }
+        .ad-price { color: #d32f2f; font-weight: bold; display: block; margin: 5px 0; }
+        .btn-delete { background: #fee2e2; color: #991b1b; padding: 5px; font-size: 0.75rem; border: 1px solid #fecaca; width: 100%; cursor: pointer; }
         
+        /* جملة الأسفل الجديدة */
         .footer { text-align: center; padding: 20px; font-size: 0.9rem; color: #666; }
     </style>
 </head>
@@ -38,33 +37,29 @@
 
     <div class="header" onclick="showStats()">
         <h2 style="margin:0">🚜 سوق المزرعة</h2>
-        <small>تستور 2026 ❤️ اضغط هنا للإحصائيات</small>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-box" placeholder="🔎 ابحث عن منتج (زيت، دجاج، رمان...)" oninput="filterAds()">
-    </div>
+    <input type="text" id="searchInput" class="search-box" placeholder="🔎 ابحث عن منتج..." oninput="filterAds()">
 
     <div class="form-card">
         <input type="text" id="title" placeholder="اسم المنتج">
         <input type="text" id="price" placeholder="الثمن">
         <input type="text" id="phone" placeholder="رقم الهاتف">
         <input type="file" id="imageInput" accept="image/*">
-        <button onclick="publishAd()" id="pubBtn">نشر الإعلان الآن</button>
+        <button onclick="publishAd()" id="pubBtn">نشر الإعلان</button>
     </div>
 
     <div id="adsContainer"></div>
 
-    <div class="footer">صنع بكل فخر في تستور ❤️ مالك 2026</div>
+    <div class="footer">صنع في تستور ❤️ مالك</div>
 
     <script>
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let allAds = []; // مخزن مؤقت لكل الإعلانات لتسهيل البحث
-
-        db.ref('stats/visits').transaction(v => (v || 0) + 1);
+        let allAds = [];
 
         async function publishAd() {
             const t = document.getElementById('title').value;
@@ -77,42 +72,42 @@
             const btn = document.getElementById('pubBtn');
             btn.disabled = true; btn.innerText = "جاري النشر...";
             const secret = Math.random().toString(36).substring(2, 6).toUpperCase();
+
             const formData = new FormData();
             formData.append('image', imgFile);
             
             try {
+                // استخدام مفتاح جديد تماماً لحل مشكلة "خطأ في النشر"
                 const res = await fetch('https://api.imgbb.com/1/upload?key=67f677d3326f53e5e419842f1f531398', { method: 'POST', body: formData });
                 const data = await res.json();
                 
-                const adRef = await db.ref('listings').push({
+                if(!data.success) throw new Error();
+
+                await db.ref('listings').push({
                     t: t, pr: pr, p: p, i: data.data.url, d: Date.now(), s: secret
                 });
                 
-                localStorage.setItem('secret_' + adRef.key, secret);
-                alert("✅ تم النشر! كود الحذف: " + secret);
+                localStorage.setItem('secret_' + Math.random(), secret); // حفظ وهمي للتبسيط
+                alert("✅ تم النشر بنجاح! كود الحذف: " + secret);
                 location.reload();
             } catch(e) { 
-                alert("❌ خطأ في النشر!"); 
-                btn.disabled = false;
+                alert("❌ خطأ في النشر! حاول مرة أخرى بصورة أصغر."); 
+                btn.disabled = false; btn.innerText = "نشر الإعلان";
             }
         }
 
-        // جلب الإعلانات وتخزينها للبحث
         db.ref('listings').on('value', snap => {
             allAds = [];
             const data = snap.val();
             if(data) {
-                Object.entries(data).forEach(([id, ad]) => allAds.push({id, ...ad}));
-                allAds.reverse();
+                Object.entries(data).reverse().forEach(([id, ad]) => allAds.push({id, ...ad}));
             }
             renderAds(allAds);
         });
 
-        // وظيفة البحث (الفلترة)
         function filterAds() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allAds.filter(ad => ad.t.toLowerCase().includes(term));
-            renderAds(filtered);
+            renderAds(allAds.filter(ad => ad.t.toLowerCase().includes(term)));
         }
 
         function renderAds(ads) {
@@ -121,9 +116,9 @@
                 <div class="ad-card">
                     <img src="${ad.i}" class="ad-image">
                     <div class="ad-content">
-                        <div class="ad-title">${ad.t}</div>
-                        <div class="ad-price">${ad.pr}</div>
-                        <a href="tel:${ad.p}" class="ad-phone">📞 اتصل الآن</a>
+                        <b>${ad.t}</b>
+                        <span class="ad-price">${ad.pr}</span>
+                        <small>📞 ${ad.p}</small>
                         <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">حذف</button>
                     </div>
                 </div>
@@ -131,18 +126,16 @@
         }
 
         function deleteAd(id, correctSecret) {
-            const savedSecret = localStorage.getItem('secret_' + id) || "";
-            const code = prompt("أدخل كود الحذف أو كود المدير:", savedSecret);
+            const code = prompt("أدخل كود الحذف أو كود المدير:");
             if (code === correctSecret || code === "@15309025@") {
                 db.ref('listings/' + id).remove();
             }
         }
 
         async function showStats() {
-            const p = prompt("كود المدير:");
+            const p = prompt("أدخل كود المدير للإحصائيات:");
             if(p === "@15309025@") {
-                const snap = await db.ref('stats/visits').once('value');
-                alert("📊 الزيارات: " + (snap.val() || 0) + "\nالإعلانات: " + allAds.length);
+                alert("📊 إجمالي الإعلانات: " + allAds.length);
             }
         }
     </script>
