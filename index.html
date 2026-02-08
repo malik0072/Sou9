@@ -24,7 +24,7 @@ input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; borde
 .btn-call { background:var(--p); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
 .btn-wa { background:var(--w); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
 .btn-del { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; width:100%; margin-top:8px; padding:5px; border-radius:5px; font-size:0.7rem; cursor:pointer; }
-.footer { text-align:center; padding:25px; font-size:0.9rem; color:#666; }
+.footer { text-align:center; padding:25px; font-size:0.9rem; color:#666; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -44,7 +44,8 @@ input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; borde
 </div>
 
 <div id="adsContainer"></div>
-<div class="footer">صنع بكل فخر في تستور ❤️ مالك 2026</div>
+
+<div class="footer">صنع في تستور ❤️ مالك</div>
 
 <script>
 const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
@@ -74,7 +75,6 @@ async function compress(file) {
 async function publishAd() {
     const title = document.getElementById('t').value, price = document.getElementById('pr').value, phone = document.getElementById('ph').value, file = document.getElementById('img').files[0];
     if(!title || !price || !phone || !file) return alert("أكمل البيانات!");
-    
     const b = document.getElementById('btn'); b.disabled=true; b.innerText="⏳ جاري الرفع...";
 
     try {
@@ -87,7 +87,7 @@ async function publishAd() {
             const sec = Math.random().toString(36).substring(7).toUpperCase();
             const adRef = await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:sec, d:Date.now() });
             
-            // حفظ كود الحذف فوراً في ذاكرة الهاتف قبل تحديث الصفحة لضمان بقائه
+            // حفظ كود الحذف فوراً في ذاكرة الهاتف
             localStorage.setItem('my_code_' + adRef.key, sec);
             
             alert("✅ تم النشر بنجاح!\n\n🔑 كود الحذف الخاص بك هو: " + sec);
@@ -108,8 +108,7 @@ function renderAds(data){
         <img src="${a.i}" class="ad-image">
         <div class="ad-content">
             <span class="ad-title">${a.t}</span>
-            <span class="ad-price">السعر: ${a.pr}</span>
-            <div class="contact-btns">
+            <span class="ad-price">السعر: ${a.pr}</span> <div class="contact-btns">
                 <a href="tel:${a.p}" class="btn-call">📞 اتصال</a>
                 <a href="https://wa.me/216${a.p}" class="btn-wa">💬 واتساب</a>
             </div>
@@ -124,25 +123,21 @@ function filterAds(){
 }
 
 function delAd(id, serverCode){
-    // استرجاع الكود المحفوظ للإعلان من ذاكرة الهاتف وإظهاره تلقائياً
+    // استرجاع الكود المحفوظ للإعلان وعرضه تلقائياً
     const savedCode = localStorage.getItem('my_code_' + id) || "";
-    
-    // المربع الآن سيظهر وفيه الكود مكتوباً جاهزاً للمستخدم
     const input = prompt("أدخل كود الحذف:", savedCode);
     
     if(input === serverCode || input === _0xM[0]) {
-        if(confirm("هل أنت متأكد من حذف هذا الإعلان؟")) {
+        if(confirm("هل أنت متأكد من الحذف؟")) {
             db.ref('listings/'+id).remove();
-            localStorage.removeItem('my_code_' + id); // مسح الكود بعد الحذف
+            localStorage.removeItem('my_code_' + id);
         }
-    } else if(input !== null) {
-        alert("❌ الكود خاطئ");
-    }
+    } else if(input !== null) alert("❌ الكود خاطئ");
 }
 
 function checkAdmin(){
     const input = prompt("كود المدير:");
-    if(input===_0xM[0]) alert("📊 إحصائيات: " + ads.length + " إعلان حالياً");
+    if(input===_0xM[0]) alert("📊 إحصائيات: " + ads.length + " إعلان");
 }
 </script>
 </body>
