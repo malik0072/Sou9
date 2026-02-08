@@ -7,27 +7,36 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; text-align: center; }
+        .publish-container { border: 2px solid #28a745; padding: 25px; border-radius: 15px; background: white; max-width: 500px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .pub-btn { background-color: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 60%; transition: 0.3s; }
+        .pub-btn:hover { background-color: #218838; }
+        .listings-title { margin-top: 40px; font-weight: bold; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin: 15px; width: 280px; display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: right; }
+        .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
+        .del-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+    </style>
 </head>
 <body>
 
-    <h1 style="color: #2c3e50;">🚜 سوق المزرعة</h1>
+    <h1>🚜 سوق المزرعة</h1>
 
-    <div id="publish-section" style="border: 2px solid #28a745; padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
-        <h3>إضافة إعلان جديد (مجاني)</h3>
+    <div class="publish-container">
+        <h2>إضافة إعلان جديد (مجاني)</h2>
         <input type="text" id="pTitle" placeholder="ماذا تبيع؟ (مثلاً: علوش بركي)">
         <input type="text" id="pPhone" placeholder="رقم الهاتف (تونس)">
         <input type="file" id="pFile" accept="image/*">
-        <button id="pubBtn" onclick="handlePublish()">نشر الإعلان الآن</button>
-        <p id="status" style="font-weight: bold;"></p>
+        <button class="pub-btn" id="uploadBtn" onclick="handlePublish()">نشر الإعلان الآن</button>
+        <p id="statusMsg"></p>
     </div>
 
-    <hr>
-
-    <h3 style="text-align: right; padding-right: 10%;">الإعلانات المتوفرة:</h3>
-    <div id="listings-container" style="display: flex; flex-wrap: wrap; justify-content: center;">جاري التحميل...</div>
+    <h3 class="listings-title">الإعلانات المتوفرة:</h3>
+    <div id="listings-grid">جاري التحميل...</div>
 
     <script>
-        // 1. إعدادات Firebase (تأكد من مطابقتها لمشروعك)
+        // 1. إعدادات Firebase الخاصة بك (تأكد من مطابقتها لمشروعك)
         const firebaseConfig = {
             apiKey: "AIzaSy...", 
             databaseURL: "https://votre-projet.firebaseio.com",
@@ -38,29 +47,29 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // 2. تسجيل دخولك كمدير (تلقائياً) لإظهار زر الحذف لك وحدك
+        // 2. تسجيل دخول المدير (مالك) تلقائياً لإظهار أزرار الحذف
         auth.signInWithEmailAndPassword("malikhammami0@gmail.com", "@15309025@")
-            .then(() => console.log("مرحباً مالك! أنت الآن في وضع المدير ✅"))
-            .catch((e) => console.log("تصفح عام (بدون صلاحيات حذف)"));
+            .then(() => console.log("وضع المدير مفعل ✅"))
+            .catch(() => console.log("تصفح زائر"));
 
-        // 3. دالة النشر (مفتوحة للجميع) باستخدام ImgBB
+        // 3. وظيفة النشر للجميع (بدون حساب)
         async function handlePublish() {
             const file = document.getElementById('pFile').files[0];
             const title = document.getElementById('pTitle').value;
             const phone = document.getElementById('pPhone').value;
-            const status = document.getElementById('status');
-            const btn = document.getElementById('pubBtn');
+            const msg = document.getElementById('statusMsg');
+            const btn = document.getElementById('uploadBtn');
 
-            if (!file || !title || !phone) return alert("الرجاء إكمال البيانات");
+            if (!file || !title || !phone) return alert("الرجاء ملء كل الخانات");
 
-            status.innerText = "جاري رفع الصورة... انتظر قليلاً";
+            msg.innerText = "جاري النشر... انتظر لحظة";
             btn.disabled = true;
 
             const formData = new FormData();
             formData.append("image", file);
             
             try {
-                // رفع الصورة لـ ImgBB لتجنب تكاليف Firebase Storage
+                // رفع الصورة لـ ImgBB (مجاني)
                 const res = await fetch("https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189", {
                     method: "POST",
                     body: formData
@@ -68,60 +77,50 @@
                 const json = await res.json();
                 const imgUrl = json.data.url;
 
-                // إرسال البيانات لقاعدة البيانات المجانية
+                // الحفظ في Realtime Database
                 await db.ref('listings').push({
                     title: title,
                     phone: phone,
                     img: imgUrl,
-                    createdAt: Date.now()
+                    time: Date.now()
                 });
 
-                status.innerText = "✅ تم النشر بنجاح!";
+                msg.style.color = "green";
+                msg.innerText = "✅ تم النشر بنجاح!";
                 document.getElementById('pTitle').value = "";
                 document.getElementById('pPhone').value = "";
             } catch (err) {
-                status.innerText = "❌ حدث خطأ: " + err.message;
+                msg.style.color = "red";
+                msg.innerText = "❌ خطأ: " + err.message;
             } finally {
                 btn.disabled = false;
             }
         }
 
-        // 4. عرض البيانات وتفعيل زر الحذف لمالك فقط
+        // 4. عرض الإعلانات مع ميزة الحذف لمالك فقط
         db.ref('listings').on('value', (snapshot) => {
-            const container = document.getElementById('listings-container');
-            container.innerHTML = "";
-            const currentUser = auth.currentUser;
+            const grid = document.getElementById('listings-grid');
+            grid.innerHTML = "";
+            const isManager = auth.currentUser && auth.currentUser.email === "malikhammami0@gmail.com";
 
             snapshot.forEach((child) => {
-                const data = child.val();
-                const id = child.key;
-
-                container.innerHTML += `
-                    <div style="border:1px solid #ddd; margin:10px; padding:15px; border-radius:8px; width:250px; background:#fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                        <img src="${data.img}" style="width:100%; border-radius:5px;"><br>
-                        <h4 style="margin:10px 0;">${data.title}</h4>
-                        <p>📞 الهاتف: <a href="tel:${data.phone}">${data.phone}</a></p>
-                        ${currentUser && currentUser.email === "malikhammami0@gmail.com" 
-                            ? `<button onclick="deleteItem('${id}')" style="background:red; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">حذف الإعلان 🗑️</button>` 
-                            : ""}
+                const item = child.val();
+                grid.innerHTML += `
+                    <div class="card">
+                        <img src="${item.img}">
+                        <h4>${item.title}</h4>
+                        <p>📞 هاتف: <a href="tel:${item.phone}">${item.phone}</a></p>
+                        ${isManager ? `<button class="del-btn" onclick="deleteItem('${child.key}')">حذف 🗑️</button>` : ""}
                     </div>
                 `;
             });
         });
 
-        // 5. وظيفة الحذف (مقفولة بقواعد الحماية للمدير فقط)
         function deleteItem(id) {
             if (confirm("هل تريد حذف هذا الإعلان؟")) {
                 db.ref('listings/' + id).remove();
             }
         }
     </script>
-
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; text-align: center; }
-        input { display: block; margin: 10px auto; padding: 10px; width: 90%; border: 1px solid #ddd; border-radius: 5px; }
-        button { padding: 12px 25px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        button:disabled { background: #ccc; }
-    </style>
 </body>
 </html>
