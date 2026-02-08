@@ -17,14 +17,17 @@
         input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
         button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
         
-        /* تنسيق الإعلانات ليكون أصغر وأجمل */
         #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
         .ad-card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #eee; }
         .ad-image { width: 100%; height: 140px; object-fit: cover; background: #f9f9f9; }
-        .ad-content { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .ad-title { font-size: 0.9rem; margin: 0; font-weight: bold; color: #333; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .ad-phone { color: var(--primary); font-size: 0.8rem; font-weight: bold; margin: 4px 0; text-align: left; direction: ltr; }
-        .btn-delete { background: #feebeb; color: #d32f2f; padding: 6px; font-size: 0.75rem; border: 1px solid #ffcdd2; margin-top: 5px; }
+        .ad-content { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+        .ad-title { font-size: 0.9rem; margin: 0; font-weight: bold; color: #333; height: 38px; overflow: hidden; }
+        
+        /* تنسيق السعر الجديد */
+        .ad-price { color: #d32f2f; font-weight: bold; font-size: 1rem; margin: 5px 0; }
+        
+        .ad-phone { color: var(--primary); font-size: 0.85rem; font-weight: bold; margin: 2px 0; text-align: left; direction: ltr; }
+        .btn-delete { background: #feebeb; color: #d32f2f; padding: 6px; font-size: 0.75rem; border: 1px solid #ffcdd2; margin-top: 10px; }
         .footer { text-align: center; padding: 20px; font-size: 0.8rem; color: #777; }
     </style>
 </head>
@@ -32,13 +35,14 @@
 
     <div class="header" onclick="showStats()">
         <h2 style="margin:0">🚜 سوق المزرعة</h2>
-        <small>صنع بكل فخر في تستور ❤️ مالك 2026</small>
+        <small>من قلب تستور لكل تونس ❤️ 2026</small>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن منتج في المزرعة..." oninput="searchAds()">
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن رمان، علوش، دجاج..." oninput="searchAds()">
 
     <div class="form-card">
-        <input type="text" id="title" placeholder="عنوان الإعلان (مثلاً: رمان تستور)">
+        <input type="text" id="title" placeholder="ماذا تريد أن تبيع؟">
+        <input type="text" id="price" placeholder="الثمن (مثلاً: 50 دينار)">
         <input type="text" id="phone" placeholder="رقم الهاتف">
         <input type="file" id="imageInput" accept="image/*">
         <button onclick="publishAd()" id="pubBtn">نشر الإعلان الآن</button>
@@ -47,25 +51,23 @@
     <div id="adsContainer"></div>
 
     <script>
-        // إعدادات Firebase الخاصة بمشروعك
         const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let allAds = [];
 
-        // تسجيل زيارة جديدة
         db.ref('stats/visits').transaction(c => (c || 0) + 1);
 
         async function publishAd() {
             const t = document.getElementById('title').value;
+            const pr = document.getElementById('price').value; // جلب الثمن
             const p = document.getElementById('phone').value;
             const imgFile = document.getElementById('imageInput').files[0];
-            if(!t || !p || !imgFile) return alert("الرجاء إكمال جميع البيانات!");
+            
+            if(!t || !pr || !p || !imgFile) return alert("الرجاء إدخال كافة البيانات بما فيها الثمن!");
             
             const btn = document.getElementById('pubBtn');
-            btn.disabled = true; btn.innerText = "جاري الرفع...";
-            
-            // توليد الرمز السري
+            btn.disabled = true; btn.innerText = "جاري النشر...";
             const secret = Math.random().toString(36).substring(2, 6).toUpperCase();
 
             const formData = new FormData();
@@ -74,23 +76,17 @@
                 const res = await fetch('https://api.imgbb.com/1/upload?key=8730953a9e62340570b5514f76269600', { method: 'POST', body: formData });
                 const data = await res.json();
                 
-                // حفظ البيانات مع توافق كامل مع الحماية
+                // إضافة السعر (pr) في قاعدة البيانات
                 const adRef = await db.ref('listings').push({
-                    t: t, p: p, i: data.data.url, d: Date.now(), s: secret 
+                    t: t, pr: pr, p: p, i: data.data.url, d: Date.now(), s: secret 
                 });
                 
-                // حفظ الرمز السري في ذاكرة الهاتف لظهوره تلقائياً عند الحذف
                 localStorage.setItem('secret_' + adRef.key, secret);
-                
-                alert("✅ تم النشر بنجاح!\nرمزك السري هو: " + secret + "\nتم حفظه في جهازك لاستخدامه عند الحذف.");
+                alert("✅ تم النشر بنجاح! كود الحذف: " + secret);
                 location.reload();
-            } catch(e) { 
-                alert("❌ فشل الاتصال! تأكد من تحديث Rules في Firebase."); 
-                btn.disabled = false; btn.innerText = "نشر الإعلان الآن";
-            }
+            } catch(e) { alert("❌ خطأ!"); btn.disabled = false; }
         }
 
-        // جلب الإعلانات
         db.ref('listings').on('value', snap => {
             allAds = [];
             const data = snap.val();
@@ -108,8 +104,9 @@
                     <img src="${ad.i}" class="ad-image" loading="lazy">
                     <div class="ad-content">
                         <p class="ad-title">${ad.t}</p>
+                        <p class="ad-price">${ad.pr || 'اتصل للسعر'}</p> 
                         <p class="ad-phone">📞 ${ad.p}</p>
-                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">🗑️ حذف الإعلان</button>
+                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">🗑️ حذف</button>
                     </div>
                 </div>
             `).join('');
@@ -120,31 +117,24 @@
             displayAds(allAds.filter(ad => ad.t.toLowerCase().includes(q)));
         }
 
-        // نظام الحذف مع التعبئة التلقائية للرمز السري
         function deleteAd(id, correctSecret) {
-            // جلب الرمز من ذاكرة الجهاز
             const savedSecret = localStorage.getItem('secret_' + id) || "";
-            
-            // إظهار الرمز المحفوظ تلقائياً في خانة الإدخال
-            const code = prompt("أدخل كود الحذف الخاص بك (تمت تعبئته تلقائياً إذا كنت صاحب الإعلان):", savedSecret);
-            
+            const code = prompt("أدخل كود الحذف السري:", savedSecret);
             if (code === correctSecret || code === "@15309025@") {
-                if (confirm("⚠️ هل أنت متأكد من حذف الإعلان نهائياً؟")) {
+                if (confirm("حذف نهائي؟")) {
                     db.ref('listings/' + id).remove().then(() => {
                         localStorage.removeItem('secret_' + id);
-                        alert("✅ تم الحذف بنجاح");
+                        alert("✅ تم الحذف");
                     });
                 }
-            } else if (code !== null) {
-                alert("❌ الرمز السري خاطئ!");
             }
         }
 
         async function showStats() {
-            const p = prompt("أدخل كود المدير:");
+            const p = prompt("كود المدير:");
             if(p === "@15309025@") {
                 const snap = await db.ref('stats/visits').once('value');
-                alert("📊 إحصائيات سوق المزرعة:\nالزيارات: " + (snap.val() || 0) + "\nالإعلانات: " + allAds.length);
+                alert("زيارات تستور: " + (snap.val() || 0));
             }
         }
     </script>
