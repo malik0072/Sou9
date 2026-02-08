@@ -1,46 +1,53 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚜 سوق المزرعة</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<style>
-:root { --p:#2e7d32; --b:#f0f2f5; --w:#25d366; }
-body { font-family:sans-serif; background:var(--b); margin:0; padding:10px; }
-.header { text-align:center; background:white; padding:20px; border-radius:12px; margin-bottom:10px; border-bottom:4px solid var(--p); cursor:pointer; }
-.search-box { width:100%; padding:12px; border-radius:25px; border:2px solid var(--p); margin-bottom:15px; outline:none; box-sizing:border-box; }
-.form-card { background:white; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #ddd; }
-input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; }
-.btn-pub { background:var(--p); color:white; border:none; font-weight:bold; cursor:pointer; }
-#adsContainer { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px; }
-.ad-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center; display:flex; flex-direction:column; }
-.ad-image { width:100%; height:140px; object-fit:cover; }
-.ad-content { padding:10px; flex-grow:1; }
-.ad-title { font-weight:bold; display:block; margin-bottom:2px; }
-.ad-price { color:#d32f2f; font-weight:bold; display:block; font-size:1.1rem; }
-.contact-btns { display:flex; gap:5px; margin-top:10px; }
-.btn-call { background:var(--p); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
-.btn-wa { background:var(--w); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
-.btn-del { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; width:100%; margin-top:8px; padding:5px; border-radius:5px; font-size:0.7rem; cursor:pointer; }
-.footer { text-align:center; padding:25px; font-size:0.9rem; color:#666; font-weight:bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>🚜 سوق المزرعة - بيع وشراء المنتجات الزراعية</title>
+    <meta name="description" content="سوق المزرعة: منصتك لبيع وشراء المنتجات والآلات الزراعية. أضف إعلانك الآن مجاناً في سوق المزرعة وتواصل مع المشترين مباشرة.">
+    <meta name="keywords" content="سوق المزرعة, بيع, شراء, زراعة, معدات زراعية, إعلانات مبوبة">
+    
+    <meta name="google-site-verification" content="googlefbb8e99ef51bddaf.html" />
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        :root { --p:#2e7d32; --b:#f0f2f5; --w:#25d366; }
+        body { font-family:sans-serif; background:var(--b); margin:0; padding:10px; }
+        .header { text-align:center; background:white; padding:20px; border-radius:12px; margin-bottom:10px; border-bottom:4px solid var(--p); cursor:pointer; }
+        .search-box { width:100%; padding:12px; border-radius:25px; border:2px solid var(--p); margin-bottom:15px; outline:none; box-sizing:border-box; }
+        .form-card { background:white; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #ddd; }
+        input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; }
+        .btn-pub { background:var(--p); color:white; border:none; font-weight:bold; cursor:pointer; }
+        #adsContainer { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px; }
+        .ad-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center; display:flex; flex-direction:column; }
+        .ad-image { width:100%; height:140px; object-fit:cover; }
+        .ad-content { padding:10px; flex-grow:1; }
+        .ad-title { font-weight:bold; display:block; margin-bottom:2px; }
+        .ad-price { color:#d32f2f; font-weight:bold; display:block; font-size:1.1rem; }
+        .contact-btns { display:flex; gap:5px; margin-top:10px; }
+        .btn-call { background:var(--p); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
+        .btn-wa { background:var(--w); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
+        .btn-del { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; width:100%; margin-top:8px; padding:5px; border-radius:5px; font-size:0.7rem; cursor:pointer; }
+        .footer { text-align:center; padding:25px; font-size:0.9rem; color:#666; font-weight:bold; }
+    </style>
 </head>
 <body>
 
 <div class="header" onclick="checkAdmin()">
-<h2 style="margin:0">🚜 سوق المزرعة</h2>
+    <h2 style="margin:0">🚜 سوق المزرعة</h2>
 </div>
 
 <input type="text" id="searchInput" class="search-box" placeholder="🔎 ابحث عن منتج..." oninput="filterAds()">
 
 <div class="form-card">
-<input type="text" id="t" placeholder="اسم المنتج">
-<input type="text" id="pr" placeholder="الثمن">
-<input type="text" id="ph" placeholder="رقم الهاتف">
-<input type="file" id="img" accept="image/*">
-<button onclick="publishAd()" id="btn" class="btn-pub">نشر الإعلان</button>
+    <input type="text" id="t" placeholder="اسم المنتج">
+    <input type="text" id="pr" placeholder="الثمن">
+    <input type="text" id="ph" placeholder="رقم الهاتف">
+    <input type="file" id="img" accept="image/*">
+    <button onclick="publishAd()" id="btn" class="btn-pub">نشر الإعلان</button>
 </div>
 
 <div id="adsContainer"></div>
@@ -86,10 +93,7 @@ async function publishAd() {
         if(data.success){
             const sec = Math.random().toString(36).substring(7).toUpperCase();
             const adRef = await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:sec, d:Date.now() });
-            
-            // حفظ كود الحذف فوراً في ذاكرة الهاتف
             localStorage.setItem('my_code_' + adRef.key, sec);
-            
             alert("✅ تم النشر بنجاح!\n\n🔑 كود الحذف الخاص بك هو: " + sec);
             location.reload();
         } else throw new Error();
@@ -123,10 +127,8 @@ function filterAds(){
 }
 
 function delAd(id, serverCode){
-    // استرجاع الكود المحفوظ للإعلان وعرضه تلقائياً
     const savedCode = localStorage.getItem('my_code_' + id) || "";
     const input = prompt("أدخل كود الحذف:", savedCode);
-    
     if(input === serverCode || input === _0xM[0]) {
         if(confirm("هل أنت متأكد من الحذف؟")) {
             db.ref('listings/'+id).remove();
