@@ -3,43 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚜 سوق المزرعة - تستور</title>
+    <title>🚜 سوق المزرعة</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
         :root { --primary: #2e7d32; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .header { text-align: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-bottom: 4px solid var(--primary); }
-        .search-box { width: 100%; padding: 12px; border: 2px solid var(--primary); border-radius: 25px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .form-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #ddd; }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        .header { text-align: center; background: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-bottom: 3px solid var(--primary); }
+        .search-box { width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 20px; margin-bottom: 10px; box-sizing: border-box; }
+        .form-card { background: white; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ddd; }
+        input, button { width: 100%; padding: 10px; margin: 4px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
         button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
         
-        #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-        .ad-card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #eee; }
-        .ad-image { width: 100%; height: 140px; object-fit: cover; background: #f9f9f9; }
-        .ad-content { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
-        .ad-title { font-size: 0.9rem; margin: 0; font-weight: bold; color: #333; height: 38px; overflow: hidden; }
-        .ad-price { color: #d32f2f; font-weight: bold; font-size: 1rem; margin: 5px 0; }
-        .ad-phone { color: var(--primary); font-size: 0.85rem; font-weight: bold; margin: 2px 0; text-align: left; direction: ltr; }
-        .btn-delete { background: #feebeb; color: #d32f2f; padding: 6px; font-size: 0.75rem; border: 1px solid #ffcdd2; margin-top: 10px; }
-        .footer { text-align: center; padding: 20px; font-size: 0.8rem; color: #777; }
+        #adsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .ad-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #eee; display: flex; flex-direction: column; }
+        .ad-image { width: 100%; height: 130px; object-fit: cover; }
+        .ad-content { padding: 8px; text-align: center; }
+        .ad-title { font-size: 0.9rem; margin: 0; font-weight: bold; }
+        .ad-price { color: #d32f2f; font-weight: bold; margin: 4px 0; }
+        .ad-phone { color: var(--primary); font-size: 0.8rem; margin: 2px 0; }
+        .btn-delete { background: #f8d7da; color: #721c24; padding: 5px; font-size: 0.7rem; border: 1px solid #f5c6cb; margin-top: 5px; width: 100%; }
+        .footer { text-align: center; padding: 15px; font-size: 0.8rem; color: #666; }
     </style>
 </head>
 <body>
 
     <div class="header" onclick="showStats()">
         <h2 style="margin:0">🚜 سوق المزرعة</h2>
-        <small>من قلب تستور لكل تونس ❤️ 2026</small>
+        <small>من قلب تستور لكل تونس 2026</small>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث في سوق المزرعة..." oninput="searchAds()">
+    <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن منتج..." oninput="searchAds()">
 
     <div class="form-card">
-        <input type="text" id="title" placeholder="اسم المنتج (مثلاً: رمان)">
-        <input type="text" id="price" placeholder="الثمن (دينار)">
+        <input type="text" id="title" placeholder="اسم المنتج">
+        <input type="text" id="price" placeholder="الثمن">
         <input type="text" id="phone" placeholder="رقم الهاتف">
         <input type="file" id="imageInput" accept="image/*">
         <button onclick="publishAd()" id="pubBtn">نشر الإعلان الآن</button>
@@ -75,16 +75,13 @@
                 const res = await fetch('https://api.imgbb.com/1/upload?key=8730953a9e62340570b5514f76269600', { method: 'POST', body: formData });
                 const data = await res.json();
                 
-                // التأكد من إرسال كافة الحقول المطلوبة للحماية
-                const adRef = await db.ref('listings').push({
-                    t: t, pr: pr, p: p, i: data.data.url, d: Date.now(), s: secret 
-                });
+                const adRef = await db.ref('listings').push({ t, pr, p, i: data.data.url, d: Date.now(), s: secret });
                 
                 localStorage.setItem('secret_' + adRef.key, secret);
-                alert("✅ تم النشر! كود الحذف: " + secret);
+                alert("تم النشر! كود الحذف: " + secret);
                 location.reload();
             } catch(e) { 
-                alert("❌ خطأ!"); 
+                alert("خطأ! ❌"); 
                 btn.disabled = false; btn.innerText = "نشر الإعلان الآن";
             }
         }
@@ -106,9 +103,9 @@
                     <img src="${ad.i}" class="ad-image" loading="lazy">
                     <div class="ad-content">
                         <p class="ad-title">${ad.t}</p>
-                        <p class="ad-price">${ad.pr} DT</p> 
+                        <p class="ad-price">${ad.pr}</p> 
                         <p class="ad-phone">📞 ${ad.p}</p>
-                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">🗑️ حذف الإعلان</button>
+                        <button onclick="deleteAd('${ad.id}', '${ad.s}')" class="btn-delete">حذف</button>
                     </div>
                 </div>
             `).join('');
@@ -123,22 +120,22 @@
             const savedSecret = localStorage.getItem('secret_' + id) || "";
             const code = prompt("أدخل كود الحذف الخاص بالإعلان (أو كود المدير):", savedSecret);
             if (code === correctSecret || code === "@15309025@") {
-                if (confirm("هل تريد حذف الإعلان نهائياً؟")) {
+                if (confirm("حذف الإعلان؟")) {
                     db.ref('listings/' + id).remove().then(() => {
                         localStorage.removeItem('secret_' + id);
-                        alert("✅ تم الحذف");
+                        alert("تم الحذف");
                     });
                 }
             } else if (code !== null) {
-                alert("❌ الكود خاطئ!");
+                alert("الكود خاطئ!");
             }
         }
 
         async function showStats() {
-            const p = prompt("أدخل كود المدير:");
+            const p = prompt("كود المدير:");
             if(p === "@15309025@") {
                 const snap = await db.ref('stats/visits').once('value');
-                alert("إحصائيات تستور:\nالزيارات: " + (snap.val() || 0));
+                alert("الزيارات: " + (snap.val() || 0));
             }
         }
     </script>
