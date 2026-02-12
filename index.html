@@ -2,157 +2,287 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="canonical" href="https://malik0072.github.io/Sou9/">
     
     <meta name="google-site-verification" content="googlefbb8e99ef51bddaf" />
-    
     <meta name="robots" content="index, follow">
-    <meta name="googlebot" content="index, follow">
-    <link rel="canonical" href="https://malik0072.github.io/Sou9/">
-
-    <title>🚜 سوق المزرعة تونس - بيع وشراء المنتجات الزراعية</title>
-    
     <meta name="description" content="سوق المزرعة: منصة بيع وشراء المنتجات والآلات الزراعية في تونس. أضف إعلانك الآن مجاناً.">
     <meta name="keywords" content="سوق المزرعة, بيع, شراء, زراعة, معدات زراعية, تونس, تستور">
 
-    <meta property="og:title" content="سوق المزرعة تونس">
+    <meta property="og:title" content="🚜 سوق المزرعة تونس">
     <meta property="og:description" content="منصة بيع وشراء المنتجات الزراعية في تونس">
     <meta property="og:url" content="https://malik0072.github.io/Sou9/">
     <meta property="og:type" content="website">
 
+    <title>🚜 سوق المزرعة تونس - بيع وشراء المنتجات الزراعية</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
+
     <style>
-        :root { --p:#2e7d32; --b:#f0f2f5; --w:#25d366; }
-        body { font-family:sans-serif; background:var(--b); margin:0; padding:10px; }
-        .header { text-align:center; background:white; padding:20px; border-radius:12px; margin-bottom:10px; border-bottom:4px solid var(--p); cursor:pointer; }
-        .search-box { width:100%; padding:12px; border-radius:25px; border:2px solid var(--p); margin-bottom:15px; outline:none; box-sizing:border-box; }
-        .form-card { background:white; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #ddd; }
-        input, button { width:100%; padding:12px; margin:5px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; }
-        .btn-pub { background:var(--p); color:white; border:none; font-weight:bold; cursor:pointer; }
-        #adsContainer { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px; }
-        .ad-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center; display:flex; flex-direction:column; }
-        .ad-image { width:100%; height:140px; object-fit:cover; }
-        .ad-content { padding:10px; flex-grow:1; }
-        .ad-title { font-weight:bold; display:block; margin-bottom:2px; }
-        .ad-price { color:#d32f2f; font-weight:bold; display:block; font-size:1.1rem; }
-        .contact-btns { display:flex; gap:5px; margin-top:10px; }
-        .btn-call { background:var(--p); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
-        .btn-wa { background:var(--w); color:white; text-decoration:none; flex:1; padding:8px; border-radius:5px; font-size:0.8rem; font-weight:bold; }
-        .btn-del { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; width:100%; margin-top:8px; padding:5px; border-radius:5px; font-size:0.7rem; cursor:pointer; }
-        .footer { text-align:center; padding:25px; font-size:0.9rem; color:#666; font-weight:bold; }
+        :root { --p: #2e7d32; --a: #ff9800; --bg: #f8f9fa; --glass: rgba(255, 255, 255, 0.95); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { background: var(--p); padding: 18px; color: white; text-align: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex-shrink: 0; z-index: 10; cursor: pointer; }
+        
+        .main-container { flex-grow: 1; overflow-y: auto; padding-bottom: 100px; }
+        .page { display: none; padding: 12px; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* شبكة الإعلانات (3 في السطر) */
+        .ads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.06); display: flex; flex-direction: column; height: 200px; border: 1px solid #edf2f7; position: relative; }
+        .ad-img { height: 70px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .ad-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .ad-info { padding: 6px 4px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .ad-info b { font-size: 0.7rem; color: #1e293b; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .ad-price { color: var(--p); font-weight: 800; font-size: 0.8rem; margin-top: 2px; }
+        .ad-tag { font-size: 0.55rem; color: #64748b; font-weight: bold; background: #f1f5f9; border-radius: 4px; padding: 1px 3px; margin-bottom: 2px; display: inline-block; }
+        
+        .ad-btns { display: flex; border-top: 1px solid #f1f5f9; background: #fff; }
+        .ad-btns a { flex: 1; padding: 10px; text-align: center; color: var(--p); text-decoration: none; font-size: 1rem; }
+        .btn-call { border-left: 1px solid #f1f5f9; }
+        .btn-del-ad { position: absolute; top: 2px; left: 2px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; color: red; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 5; }
+
+        /* واجهة المطور */
+        .dev-wrapper { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; text-align: center; }
+        .dev-profile { width: 90px; height: 90px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--p); box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 15px; border: 3px solid #fff; }
+        .btn-call-dev { display: block; background: var(--p); color: white; padding: 18px; border-radius: 15px; text-decoration: none; font-weight: bold; width: 100%; box-shadow: 0 5px 15px rgba(46,125,50,0.3); font-size: 1.1rem; }
+
+        /* البار السفلي */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--glass); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 1px solid rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-btn { border: none; background: none; color: #94a3b8; font-size: 1.3rem; display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .nav-btn.active { color: var(--p); }
+        .nav-btn span { font-size: 0.6rem; margin-top: 4px; font-weight: 700; }
+
+        /* المودال والمدخلات */
+        .modal { display: none; position: fixed; inset: 0; background: white; z-index: 2000; padding: 25px; overflow-y: auto; }
+        .modal.active { display: block; }
+        input { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; background: #f8fafc; outline: none; }
+        .btn-post-final { width: 100%; padding: 16px; background: var(--p); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; }
+        
+        .form-container { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     </style>
 </head>
 <body>
 
-<div class="header" onclick="checkAdmin()">
-    <h2 style="margin:0">🚜 سوق المزرعة</h2>
-</div>
+    <header id="h-title" onclick="app.checkAdmin()">سوق المزرعة</header>
 
-<input type="text" id="searchInput" class="search-box" placeholder="🔎 ابحث عن منتج..." oninput="filterAds()">
-
-<div class="form-card">
-    <input type="text" id="t" placeholder="اسم المنتج">
-    <input type="text" id="pr" placeholder="الثمن">
-    <input type="text" id="ph" placeholder="رقم الهاتف">
-    <input type="file" id="img" accept="image/*">
-    <button onclick="publishAd()" id="btn" class="btn-pub">نشر الإعلان</button>
-</div>
-
-<div id="adsContainer"></div>
-
-<div class="footer">صنع في تستور ❤️ مالك</div>
-
-<script>
-const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let ads = [];
-
-const _0xM = ["\x40\x31\x35\x33\x30\x39\x30\x32\x35\x40"]; 
-
-async function compress(file) {
-    return new Promise(res => {
-        const reader = new FileReader(); reader.readAsDataURL(file);
-        reader.onload = e => {
-            const img = new Image(); img.src = e.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const maxWidth = 500;
-                if(img.width > maxWidth){ canvas.width = maxWidth; canvas.height = img.height * (maxWidth / img.width); }
-                else { canvas.width = img.width; canvas.height = img.height; }
-                canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-                canvas.toBlob(blob => res(blob),'image/jpeg',0.6);
-            }
-        }
-    });
-}
-
-async function publishAd() {
-    const title = document.getElementById('t').value, price = document.getElementById('pr').value, phone = document.getElementById('ph').value, file = document.getElementById('img').files[0];
-    if(!title || !price || !phone || !file) return alert("أكمل البيانات!");
-    const b = document.getElementById('btn'); b.disabled=true; b.innerText="⏳ جاري الرفع...";
-
-    try {
-        const blob = await compress(file);
-        const fd = new FormData(); fd.append('image', blob);
-        const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{ method:'POST', body:fd });
-        const data = await res.json();
-
-        if(data.success){
-            const sec = Math.random().toString(36).substring(7).toUpperCase();
-            const adRef = await db.ref('listings').push({ t:title, pr:price, p:phone, i:data.data.url, s:sec, d:Date.now() });
-            localStorage.setItem('my_code_' + adRef.key, sec);
-            alert("✅ تم النشر بنجاح!\n\n🔑 كود الحذف الخاص بك هو: " + sec);
-            location.reload();
-        } else throw new Error();
-    } catch(e) { alert("❌ خطأ! جرب مرة أخرى."); b.disabled=false; b.innerText="نشر الإعلان"; }
-}
-
-db.ref('listings').on('value', s=>{
-    ads=[]; const data = s.val();
-    if(data) Object.entries(data).reverse().forEach(([id,a])=>ads.push({id,...a}));
-    renderAds(ads);
-});
-
-function renderAds(data){
-    document.getElementById('adsContainer').innerHTML = data.map(a=>`
-    <div class="ad-card">
-        <img src="${a.i}" class="ad-image">
-        <div class="ad-content">
-            <span class="ad-title">${a.t}</span>
-            <span class="ad-price">السعر: ${a.pr}</span> <div class="contact-btns">
-                <a href="tel:${a.p}" class="btn-call">📞 اتصال</a>
-                <a href="https://wa.me/216${a.p}" class="btn-wa">💬 واتساب</a>
-            </div>
-            <button onclick="delAd('${a.id}','${a.s}')" class="btn-del">حذف</button>
+    <div class="main-container">
+        <div id="home-pg" class="page active">
+            <input type="text" id="search-in" oninput="app.search()" placeholder="🔍 ابحث عن منتج أو سعر...">
+            <div class="ads-grid" id="main-ads-box"></div>
         </div>
-    </div>`).join('');
-}
 
-function filterAds(){
-    const term = document.getElementById('searchInput').value.toLowerCase();
-    renderAds(ads.filter(a=>a.t.toLowerCase().includes(term)));
-}
+        <div id="lands-pg" class="page">
+            <div class="form-container">
+                <h4 style="margin:0 0 12px 0; color: brown; border-right: 3px solid brown; padding-right: 8px;">نشر أرض للكراء</h4>
+                <input type="text" id="l-size" placeholder="المساحة (مثلاً: 1 هكتار)">
+                <input type="number" id="l-price" placeholder="السعر">
+                <input type="text" id="l-loc" placeholder="المكان">
+                <input type="tel" id="l-phone" placeholder="رقم الهاتف">
+                <button onclick="app.postAd('lands')" id="btn-l" style="width:100%; padding:14px; background:brown; color:white; border:none; border-radius:12px; font-weight:bold;">نشر في الأراضي</button>
+            </div>
+            <div class="ads-grid" id="lands-ads-box"></div>
+        </div>
 
-function delAd(id, serverCode){
-    const savedCode = localStorage.getItem('my_code_' + id) || "";
-    const input = prompt("أدخل كود الحذف:", savedCode);
-    if(input === serverCode || input === _0xM[0]) {
-        if(confirm("هل أنت متأكد من الحذف؟")) {
-            db.ref('listings/'+id).remove();
-            localStorage.removeItem('my_code_' + id);
-        }
-    } else if(input !== null) alert("❌ الكود خاطئ");
-}
+        <div id="help-pg" class="page">
+            <div class="form-container">
+                <h4 style="margin:0 0 12px 0; color: var(--p); border-right: 3px solid var(--p); padding-right: 8px;">طلب عمال (عونة)</h4>
+                <input type="text" id="h-title-in" placeholder="نوع العمل">
+                <input type="number" id="h-price" placeholder="اليومية">
+                <input type="text" id="h-loc" placeholder="المكان">
+                <input type="tel" id="h-phone" placeholder="رقم الهاتف">
+                <button onclick="app.postAd('help')" id="btn-h" style="width:100%; padding:14px; background:var(--a); color:white; border:none; border-radius:12px; font-weight:bold;">نشر طلب عمال</button>
+            </div>
+            <div class="ads-grid" id="help-box"></div>
+        </div>
 
-function checkAdmin(){
-    const input = prompt("كود المدير:");
-    if(input===_0xM[0]) alert("📊 إحصائيات: " + ads.length + " إعلان");
-}
-</script>
+        <div id="dev-pg" class="page">
+            <div class="dev-wrapper">
+                <div class="dev-profile"><i class="fas fa-user-gear"></i></div>
+                <h2 style="margin:0">المطور التقني</h2>
+                <p style="color:#64748b; margin-bottom:25px">دعم فني وتطوير الموقع ❤️ مالك</p>
+                <div style="background:white; padding:25px; border-radius:25px; width:100%; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                    <a href="tel:24023895" class="btn-call-dev"><i class="fas fa-phone-alt"></i> اتصل بي: 24023895</a>
+                    <p style="font-size: 0.8rem; color: #cbd5e1; margin-top: 15px;">صنع في تستور</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-modal" class="modal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px">
+            <h3 style="margin:0">إضافة منتج للسوق</h3>
+            <button onclick="app.closeModal()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; font-size:1.2rem; color:#64748b">&times;</button>
+        </div>
+        <input type="file" id="f-img" accept="image/*" onchange="app.preview(this)">
+        <div id="img-pre" style="height:120px; background:#f8fafc; margin-bottom:15px; display:none; border-radius:15px; overflow:hidden; border:2px dashed #cbd5e1"></div>
+        <input type="text" id="f-title" placeholder="اسم المنتج">
+        <input type="number" id="f-price" placeholder="الثمن (د.ت)">
+        <input type="tel" id="f-phone" placeholder="رقم هاتفك">
+        <button onclick="app.postAd('main')" id="btn-m" class="btn-post-final">نشر الإعلان الآن</button>
+    </div>
+
+    <nav class="nav-bar">
+        <button class="nav-btn active" onclick="app.nav('home-pg', this)"><i class="fas fa-home"></i><span>الرئيسية</span></button>
+        <button class="nav-btn" onclick="app.nav('lands-pg', this)"><i class="fas fa-mountain"></i><span>الأراضي</span></button>
+        <button class="nav-btn" onclick="app.openModal()" style="color:var(--a);"><i class="fas fa-plus-circle" style="font-size:2.5rem; transform:translateY(-5px)"></i></button>
+        <button class="nav-btn" onclick="app.nav('dev-pg', this)"><i class="fas fa-id-card"></i><span>المطور</span></button>
+        <button class="nav-btn" onclick="app.nav('help-pg', this)"><i class="fas fa-people-group"></i><span>العونة</span></button>
+    </nav>
+
+    <script>
+        // إعدادات Firebase والمفاتيح السحرية
+        const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const _0xM = ["\x40\x31\x35\x33\x30\x39\x30\x32\x35\x40"];
+
+        const app = {
+            adsData: { main: [] },
+
+            nav: (id, btn) => {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('h-title').innerText = btn.querySelector('span').innerText;
+            },
+
+            openModal: () => document.getElementById('add-modal').classList.add('active'),
+            closeModal: () => document.getElementById('add-modal').classList.remove('active'),
+
+            preview: (input) => {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const pre = document.getElementById('img-pre');
+                        pre.style.display = 'block';
+                        pre.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover">`;
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            },
+
+            async compress(file) {
+                return new Promise(res => {
+                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = e => {
+                        const img = new Image(); img.src = e.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const maxWidth = 500;
+                            if(img.width > maxWidth){ canvas.width = maxWidth; canvas.height = img.height * (maxWidth / img.width); }
+                            else { canvas.width = img.width; canvas.height = img.height; }
+                            canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+                            canvas.toBlob(blob => res(blob),'image/jpeg',0.6);
+                        }
+                    }
+                });
+            },
+
+            async postAd(type) {
+                let t, p, ph, file, loc="", size="", btnId;
+                
+                if(type === 'main') {
+                    t = document.getElementById('f-title').value; p = document.getElementById('f-price').value; 
+                    ph = document.getElementById('f-phone').value; file = document.getElementById('f-img').files[0];
+                    btnId = 'btn-m';
+                    if(!file) return alert("الرجاء اختيار صورة للمنتج");
+                } else if(type === 'lands') {
+                    size = document.getElementById('l-size').value; p = document.getElementById('l-price').value;
+                    ph = document.getElementById('l-phone').value; loc = document.getElementById('l-loc').value;
+                    t = "أرض للكراء"; btnId = 'btn-l';
+                } else {
+                    t = document.getElementById('h-title-in').value; p = document.getElementById('h-price').value;
+                    ph = document.getElementById('h-phone').value; loc = document.getElementById('h-loc').value;
+                    btnId = 'btn-h';
+                }
+
+                if(!t || !p || !ph) return alert("أكمل جميع الخانات!");
+                const b = document.getElementById(btnId); b.disabled = true; b.innerText = "⏳ جاري الرفع...";
+
+                let imgUrl = "";
+                if(file) {
+                    try {
+                        const blob = await this.compress(file);
+                        const fd = new FormData(); fd.append('image', blob);
+                        const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{ method:'POST', body:fd });
+                        const data = await res.json();
+                        imgUrl = data.data.url;
+                    } catch(e) { alert("خطأ في رفع الصورة!"); b.disabled=false; return; }
+                }
+
+                const sec = Math.random().toString(36).substring(7).toUpperCase();
+                const adRef = await db.ref('all_ads').push({ t, p, ph, img: imgUrl, loc, size, type, sec, d: Date.now() });
+                localStorage.setItem('my_code_' + adRef.key, sec);
+                alert("✅ تم النشر! كود الحذف: " + sec);
+                location.reload();
+            },
+
+            createCard: (id, ad) => `
+                <div class="ad-card">
+                    <button class="btn-del-ad" onclick="app.delAd('${id}','${ad.sec}')">×</button>
+                    <div class="ad-img">${ad.img ? `<img src="${ad.img}" loading="lazy">` : `<i class="fas fa-image"></i>`}</div>
+                    <div class="ad-info">
+                        ${ad.size ? `<span class="ad-tag">${ad.size}</span>` : ''}
+                        <b>${ad.t}</b>
+                        ${ad.loc ? `<span style="font-size:0.55rem; color:#94a3b8">${ad.loc}</span>` : ''}
+                        <span class="ad-price">${ad.p} د.ت</span>
+                    </div>
+                    <div class="ad-btns">
+                        <a href="tel:${ad.ph}" class="btn-call"><i class="fas fa-phone-alt"></i></a>
+                        <a href="https://wa.me/216${ad.ph}"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>`,
+
+            render: () => {
+                db.ref('all_ads').on('value', s => {
+                    const data = s.val();
+                    const boxes = { main: document.getElementById('main-ads-box'), lands: document.getElementById('lands-ads-box'), help: document.getElementById('help-box') };
+                    Object.values(boxes).forEach(b => b.innerHTML = "");
+                    app.adsData.main = [];
+
+                    if(data) {
+                        Object.entries(data).reverse().forEach(([id, ad]) => {
+                            const html = app.createCard(id, ad);
+                            if(ad.type === 'main') { boxes.main.innerHTML += html; app.adsData.main.push({id, ...ad}); }
+                            else if(ad.type === 'lands') boxes.lands.innerHTML += html;
+                            else if(ad.type === 'help') boxes.help.innerHTML += html;
+                        });
+                    }
+                });
+            },
+
+            delAd(id, serverCode) {
+                const savedCode = localStorage.getItem('my_code_' + id) || "";
+                const input = prompt("أدخل كود الحذف:", savedCode);
+                if(input === serverCode || input === _0xM[0]) {
+                    if(confirm("هل تريد حذف هذا الإعلان نهائياً؟")) db.ref('all_ads/' + id).remove();
+                } else if(input !== null) alert("الكود غير صحيح!");
+            },
+
+            search: () => {
+                const q = document.getElementById('search-in').value.toLowerCase();
+                const filtered = app.adsData.main.filter(ad => ad.t.toLowerCase().includes(q) || ad.p.includes(q));
+                document.getElementById('main-ads-box').innerHTML = filtered.map(ad => app.createCard(ad.id, ad)).join('');
+            },
+
+            checkAdmin: () => {
+                const input = prompt("كود المدير:");
+                if(input === _0xM[0]) alert("مرحباً بك يا مدير سوق المزرعة!");
+            }
+        };
+
+        app.render();
+    </script>
 </body>
 </html>
