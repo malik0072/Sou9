@@ -8,11 +8,12 @@
     <link rel="apple-touch-icon" href="favicon.png">
 
     <title>سوق المزرعة - Malik</title>
-    <meta name="description" content="سوق المزرعة: منصة لبيع المنتجات الفلاحية، كراء وبيع الأراضي، وطلب العونة.">
-    <meta name="keywords" content="سوق, مزرعة, فلاحة, أرض, عونة, تونس, تستور">
+    <meta name="description" content="سوق المزرعة: المنصة الأولى لبيع المنتجات الفلاحية، كراء وبيع الأراضي، وطلب العونة. شكراً لكل من يساهم في إنجاح الموقع.">
+    <meta name="keywords" content="سوق, مزرعة, فلاحة, أرض, عونة, تونس, تستور, مالك">
     <meta property="og:title" content="سوق المزرعة - Malik">
     <meta property="og:description" content="منصة متكاملة لخدمات الفلاح في تونس.">
-    <meta property="og:image" content="favicon.png"> <meta property="og:type" content="website">
+    <meta property="og:image" content="favicon.png">
+    <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -23,40 +24,47 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
         
-        header { position: sticky; top: 0; background: var(--p); padding: 12px; color: white; text-align: center; font-weight: bold; z-index: 1500; }
+        header { position: sticky; top: 0; background: var(--p); padding: 12px; color: white; text-align: center; font-weight: bold; z-index: 1500; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
         .main-container { flex-grow: 1; overflow-y: auto; padding: 10px 10px 180px 10px; }
         .page { display: none; }
         .page.active { display: block; }
 
+        /* البحث الذكي */
         .search-box { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 12px; background: #222; color: #fff; margin-bottom: 15px; outline: none; }
 
-        /* تنظيم الإعلانات */
+        /* تنظيم الإعلانات - شبكة */
         .ads-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .ad-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #2d2d2d; position: relative; display: flex; flex-direction: column; }
         .ad-img img { width: 100%; height: 110px; object-fit: cover; background: #222; }
         .ad-info { padding: 8px; text-align: center; }
-        .ad-title { font-size: 0.9rem; font-weight: bold; color: #fff; }
+        .ad-title { font-size: 0.9rem; font-weight: bold; color: #fff; display: block; }
         .ad-details { font-size: 0.75rem; color: var(--a); display: block; margin: 4px 0; }
         .ad-price { color: #4ade80; font-weight: 800; font-size: 1rem; }
         
+        /* شارات الأراضي */
         .land-badge { position: absolute; top: 5px; right: 5px; background: var(--a); color: #000; padding: 2px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; z-index: 5; }
 
-        /* العونة */
+        /* العونة - عرض طولي */
         .help-list { display: flex; flex-direction: column; gap: 10px; }
         .help-card { background: var(--card); border: 1px solid #2d2d2d; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: relative; border-right: 4px solid var(--a); }
 
+        /* الأزرار */
         .ad-btns { display: flex; border-top: 1px solid #2d2d2d; }
         .ad-btns a { flex: 1; padding: 10px; text-align: center; color: #4ade80; text-decoration: none; border-left: 1px solid #2d2d2d; font-size: 1.1rem; }
         .ad-btns a:last-child { border-left: none; }
         .btn-del { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); border: none; color: #ff4d4d; border-radius: 50%; width: 25px; height: 25px; font-size: 10px; z-index: 6; display: flex; align-items: center; justify-content: center; }
 
+        /* استمارات الإدخال */
         .form-container { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #2d2d2d; }
         input, select { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px; background: #222; color: #fff; outline: none; }
         .btn-main { width: 100%; padding: 12px; background: var(--p); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
+        /* شريط التنقل */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; padding: 10px 0 25px; border-top: 1px solid #2d2d2d; z-index: 2000; }
-        .nav-btn { flex: 1; background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; }
+        .nav-btn { flex: 1; background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; font-size: 1.2rem; }
+        .nav-btn span { font-size: 0.65rem; margin-top: 4px; }
         .nav-btn.active { color: #4ade80; }
+
         .modal { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 3000; padding: 20px; overflow-y: auto; }
         .modal.active { display: block; }
     </style>
@@ -67,7 +75,7 @@
 
     <div class="main-container">
         <div id="home-pg" class="page active">
-            <input type="text" class="search-box" id="search-in" oninput="app.search()" placeholder="🔍 ابحث بالاسم أو المكان...">
+            <input type="text" class="search-box" id="search-in" oninput="app.search()" placeholder="🔍 ابحث عن منتج أو مكان...">
             <div class="ads-grid" id="main-ads-box"></div>
         </div>
 
@@ -79,7 +87,7 @@
                 </select>
                 <input type="text" id="l-size" placeholder="المساحة">
                 <input type="text" id="l-loc" placeholder="المكان">
-                <input type="number" id="l-price" placeholder="السعر">
+                <input type="number" id="l-price" placeholder="السعر (د.ت)">
                 <input type="tel" id="l-phone" placeholder="رقم الهاتف">
                 <button onclick="app.postAd('lands')" id="btn-l" class="btn-main">نشر الإعلان</button>
             </div>
@@ -88,8 +96,8 @@
 
         <div id="help-pg" class="page">
             <div class="form-container">
-                <input type="text" id="h-work" placeholder="نوع العمل">
-                <input type="number" id="h-price" placeholder="اليومية">
+                <input type="text" id="h-work" placeholder="نوع العمل (جني، حفر...)">
+                <input type="number" id="h-price" placeholder="اليومية (د.ت)">
                 <input type="tel" id="h-phone" placeholder="رقم الهاتف">
                 <button onclick="app.postAd('help')" id="btn-h" class="btn-main">نشر طلب عمال</button>
             </div>
@@ -99,34 +107,41 @@
         <div id="dev-pg" class="page">
             <div style="text-align:center; padding:40px 20px;">
                 <h1 style="color:var(--a); margin:0;">Malik</h1>
-                <p style="color:#aaa; font-size:0.9rem; margin:20px 0;">شكراً لكل من يساهم في إنجاح الموقع.<br>موقعنا لخدمة الفلاح وتسهيل المعاملات.</p>
+                <p style="color:#aaa; font-size:0.9rem; margin:20px 0; line-height:1.6;">
+                    شكراً جزيلاً لكل من يساهم في إنجاح هذا الموقع بنشر إعلاناته ومشاركته.<br>
+                    موقعنا وُجد لخدمة الفلاح وتسهيل المعاملات الفلاحية.
+                </p>
                 <a href="tel:24023895" class="btn-main" style="text-decoration:none; display:block">اتصال بالمطور</a>
             </div>
         </div>
     </div>
 
     <div id="add-modal" class="modal">
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px"><h3>إعلان جديد</h3><span onclick="app.closeModal()" style="font-size:2rem;">&times;</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+            <h3>إعلان منتج جديد</h3>
+            <span onclick="app.closeModal()" style="font-size:2.5rem; cursor:pointer;">&times;</span>
+        </div>
         <input type="file" id="f-img" accept="image/*">
         <input type="text" id="f-title" placeholder="اسم المنتج">
         <input type="number" id="f-price" placeholder="السعر">
         <input type="tel" id="f-phone" placeholder="رقم الهاتف">
-        <button onclick="app.postAd('main')" id="btn-m" class="btn-main">نشر الآن</button>
+        <button onclick="app.postAd('main')" id="btn-m" class="btn-main">نشر الإعلان</button>
     </div>
 
     <nav class="nav-bar">
         <button class="nav-btn active" onclick="app.nav('home-pg', this)"><i class="fas fa-home"></i><span>الرئيسية</span></button>
         <button class="nav-btn" onclick="app.nav('lands-pg', this)"><i class="fas fa-mountain"></i><span>الأراضي</span></button>
-        <button class="nav-btn" onclick="app.openModal()"><i class="fas fa-plus-circle" style="font-size:2.5rem; color:var(--a);"></i></button>
+        <button class="nav-btn" onclick="app.openModal()"><i class="fas fa-plus-circle" style="font-size:2.6rem; color:var(--a);"></i></button>
         <button class="nav-btn" onclick="app.nav('dev-pg', this)"><i class="fas fa-code"></i><span>المطور</span></button>
         <button class="nav-btn" onclick="app.nav('help-pg', this)"><i class="fas fa-users"></i><span>العونة</span></button>
     </nav>
 
     <script>
+        // إعدادات Firebase
         const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const _MASTER = "@15309025@";
+        const _MASTER = "@15309025@"; // كود المدير العام
 
         const app = {
             allAds: [],
@@ -154,28 +169,34 @@
                     ph=document.getElementById('h-phone').value; btnId='btn-h'; ids=['h-work','h-price','h-phone'];
                 }
 
-                if(!t || !p || !ph) return alert("أكمل البيانات!");
-                const b = document.getElementById(btnId); b.disabled = true;
+                if(!t || !p || !ph) return alert("الرجاء إكمال البيانات!");
+                const b = document.getElementById(btnId); b.disabled = true; b.innerText = "...";
 
                 let imgUrl = "";
                 if(file) {
                     const fd = new FormData(); fd.append('image', file);
-                    const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{method:'POST', body:fd});
-                    const d = await res.json(); imgUrl = d.data.url;
+                    try {
+                        const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{method:'POST', body:fd});
+                        const d = await res.json(); imgUrl = d.data.url;
+                    } catch(e) { console.error("Image upload failed"); }
                 }
 
                 const sec = Math.random().toString(36).substring(7).toUpperCase();
                 await db.ref('all_ads').push({ t, p, ph, img:imgUrl, loc, size, type, deal, sec, d:Date.now() });
                 
-                alert("تم النشر! كود الحذف الخاص بك هو: " + sec);
+                alert("تم النشر بنجاح! كود الحذف الخاص بك هو: " + sec);
+                
+                // تفريغ الخانات فوراً بعد النشر
                 ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = "" });
-                b.disabled = false;
+                b.disabled = false; b.innerText = "نشر";
                 if(type==='main') app.closeModal();
             },
 
             delAd(id, sec) {
-                const i = prompt("أدخل كود الحذف:");
-                if(i === sec || i === _MASTER) db.ref('all_ads/' + id).remove();
+                const i = prompt("أدخل كود الحذف السري:");
+                if(i === sec || i === _MASTER) {
+                    if(confirm("هل أنت متأكد من حذف الإعلان؟")) db.ref('all_ads/' + id).remove();
+                } else if(i !== null) alert("الكود خاطئ!");
             },
 
             render(f = null) {
