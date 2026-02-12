@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+
     <title>سوق المزرعة - Malik</title>
-    <meta name="description" content="سوق المزرعة: منصة لبيع المنتجات الفلاحية، كراء الأراضي، وطلب العونة. شكراً لكل من يساهم في إنجاح هذا الموقع.">
+    <meta name="description" content="سوق المزرعة: منصة لبيع المنتجات الفلاحية، كراء وبيع الأراضي، وطلب العونة.">
     <meta name="keywords" content="سوق, مزرعة, فلاحة, أرض, عونة, تونس, تستور">
     <meta property="og:title" content="سوق المزرعة - Malik">
-    <meta property="og:description" content="منصة متكاملة لخدمات الفلاح. بيع وشراء وكراء.">
-    <meta property="og:image" content="https://i.ibb.co/hR49L8P/farm-logo.png">
-    <meta property="og:type" content="website">
+    <meta property="og:description" content="منصة متكاملة لخدمات الفلاح في تونس.">
+    <meta property="og:image" content="favicon.png"> <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -26,38 +28,33 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* البحث الذكي */
         .search-box { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 12px; background: #222; color: #fff; margin-bottom: 15px; outline: none; }
 
-        /* تنظيم الإعلانات - الرئيسية والأراضي */
+        /* تنظيم الإعلانات */
         .ads-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .ad-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #2d2d2d; position: relative; display: flex; flex-direction: column; }
-        .ad-img img { width: 100%; height: 110px; object-fit: cover; }
+        .ad-img img { width: 100%; height: 110px; object-fit: cover; background: #222; }
         .ad-info { padding: 8px; text-align: center; }
-        .ad-title { font-size: 0.9rem; font-weight: bold; display: block; color: #fff; }
+        .ad-title { font-size: 0.9rem; font-weight: bold; color: #fff; }
         .ad-details { font-size: 0.75rem; color: var(--a); display: block; margin: 4px 0; }
-        .ad-price { color: #4ade80; font-weight: 800; font-size: 1rem; display: block; }
+        .ad-price { color: #4ade80; font-weight: 800; font-size: 1rem; }
         
-        /* العونة - عرض طولي */
+        .land-badge { position: absolute; top: 5px; right: 5px; background: var(--a); color: #000; padding: 2px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; z-index: 5; }
+
+        /* العونة */
         .help-list { display: flex; flex-direction: column; gap: 10px; }
         .help-card { background: var(--card); border: 1px solid #2d2d2d; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: relative; border-right: 4px solid var(--a); }
-        .help-content { flex: 1; font-size: 0.95rem; }
 
-        /* أزرار الاتصال والحذف */
         .ad-btns { display: flex; border-top: 1px solid #2d2d2d; }
-        .ad-btns a { flex: 1; padding: 10px; text-align: center; color: #4ade80; text-decoration: none; border-left: 1px solid #2d2d2d; }
+        .ad-btns a { flex: 1; padding: 10px; text-align: center; color: #4ade80; text-decoration: none; border-left: 1px solid #2d2d2d; font-size: 1.1rem; }
         .ad-btns a:last-child { border-left: none; }
-        .btn-del { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); border: none; color: #ff4d4d; border-radius: 50%; width: 25px; height: 25px; font-size: 12px; z-index: 5; }
-
-        /* المطور */
-        .dev-box { text-align: center; padding: 40px 20px; }
-        .thanks-msg { font-size: 0.85rem; color: #aaa; margin: 20px 0; line-height: 1.6; }
+        .btn-del { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); border: none; color: #ff4d4d; border-radius: 50%; width: 25px; height: 25px; font-size: 10px; z-index: 6; display: flex; align-items: center; justify-content: center; }
 
         .form-container { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #2d2d2d; }
-        input { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px; background: #222; color: #fff; outline: none; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px; background: #222; color: #fff; outline: none; }
         .btn-main { width: 100%; padding: 12px; background: var(--p); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; padding: 10px 0 25px; border-top: 1px solid #2d2d2d; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; padding: 10px 0 25px; border-top: 1px solid #2d2d2d; z-index: 2000; }
         .nav-btn { flex: 1; background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; }
         .nav-btn.active { color: #4ade80; }
         .modal { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 3000; padding: 20px; overflow-y: auto; }
@@ -70,17 +67,21 @@
 
     <div class="main-container">
         <div id="home-pg" class="page active">
-            <input type="text" class="search-box" id="search-in" oninput="app.search()" placeholder="🔍 بحث ذكي (اسم المنتج أو المكان)...">
+            <input type="text" class="search-box" id="search-in" oninput="app.search()" placeholder="🔍 ابحث بالاسم أو المكان...">
             <div class="ads-grid" id="main-ads-box"></div>
         </div>
 
         <div id="lands-pg" class="page">
             <div class="form-container">
+                <select id="l-deal">
+                    <option value="كراء">كراء أرض</option>
+                    <option value="بيع">بيع أرض</option>
+                </select>
                 <input type="text" id="l-size" placeholder="المساحة">
                 <input type="text" id="l-loc" placeholder="المكان">
                 <input type="number" id="l-price" placeholder="السعر">
                 <input type="tel" id="l-phone" placeholder="رقم الهاتف">
-                <button onclick="app.postAd('lands')" id="btn-l" class="btn-main">نشر في الأراضي</button>
+                <button onclick="app.postAd('lands')" id="btn-l" class="btn-main">نشر الإعلان</button>
             </div>
             <div class="ads-grid" id="lands-ads-box"></div>
         </div>
@@ -96,22 +97,16 @@
         </div>
 
         <div id="dev-pg" class="page">
-            <div class="dev-box">
-                <h1 style="color:var(--a)">Malik</h1>
-                <p class="thanks-msg">
-                    شكراً جزيلاً لكل من يساهم في إنجاح هذا الموقع بنشر إعلاناته ومشاركته.<br>
-                    موقعنا وُجد لخدمتكم وتسهيل العمل الفلاحي.
-                </p>
+            <div style="text-align:center; padding:40px 20px;">
+                <h1 style="color:var(--a); margin:0;">Malik</h1>
+                <p style="color:#aaa; font-size:0.9rem; margin:20px 0;">شكراً لكل من يساهم في إنجاح الموقع.<br>موقعنا لخدمة الفلاح وتسهيل المعاملات.</p>
                 <a href="tel:24023895" class="btn-main" style="text-decoration:none; display:block">اتصال بالمطور</a>
             </div>
         </div>
     </div>
 
     <div id="add-modal" class="modal">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-            <h3>إعلان جديد</h3>
-            <span onclick="app.closeModal()" style="font-size:2rem; cursor:pointer;">&times;</span>
-        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px"><h3>إعلان جديد</h3><span onclick="app.closeModal()" style="font-size:2rem;">&times;</span></div>
         <input type="file" id="f-img" accept="image/*">
         <input type="text" id="f-title" placeholder="اسم المنتج">
         <input type="number" id="f-price" placeholder="السعر">
@@ -145,21 +140,21 @@
             closeModal: () => document.getElementById('add-modal').classList.remove('active'),
             
             async postAd(type) {
-                let t, p, ph, file, loc="", size="", btnId, ids=[];
+                let t, p, ph, file, loc="", size="", deal="", btnId, ids=[];
                 if(type === 'main') {
                     t=document.getElementById('f-title').value; p=document.getElementById('f-price').value; 
                     ph=document.getElementById('f-phone').value; file=document.getElementById('f-img').files[0];
                     btnId='btn-m'; ids=['f-title','f-price','f-phone','f-img'];
                 } else if(type === 'lands') {
-                    size=document.getElementById('l-size').value; p=document.getElementById('l-price').value;
-                    ph=document.getElementById('l-phone').value; loc=document.getElementById('l-loc').value;
-                    t="كراء أرض"; btnId='btn-l'; ids=['l-size','l-price','l-loc','l-phone'];
+                    deal=document.getElementById('l-deal').value; size=document.getElementById('l-size').value;
+                    p=document.getElementById('l-price').value; loc=document.getElementById('l-loc').value;
+                    t=deal + " أرض"; btnId='btn-l'; ids=['l-size','l-price','l-loc','l-phone'];
                 } else {
                     t=document.getElementById('h-work').value; p=document.getElementById('h-price').value;
                     ph=document.getElementById('h-phone').value; btnId='btn-h'; ids=['h-work','h-price','h-phone'];
                 }
 
-                if(!t || !p || !ph) return alert("أكمل الخانات!");
+                if(!t || !p || !ph) return alert("أكمل البيانات!");
                 const b = document.getElementById(btnId); b.disabled = true;
 
                 let imgUrl = "";
@@ -170,10 +165,10 @@
                 }
 
                 const sec = Math.random().toString(36).substring(7).toUpperCase();
-                await db.ref('all_ads').push({ t, p, ph, img:imgUrl, loc, size, type, sec, d:Date.now() });
+                await db.ref('all_ads').push({ t, p, ph, img:imgUrl, loc, size, type, deal, sec, d:Date.now() });
                 
-                alert("تم النشر بنجاح! كود الحذف الخاص بك هو: " + sec);
-                ids.forEach(id => document.getElementById(id).value = ""); // تفريغ الخانات
+                alert("تم النشر! كود الحذف الخاص بك هو: " + sec);
+                ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = "" });
                 b.disabled = false;
                 if(type==='main') app.closeModal();
             },
@@ -183,25 +178,23 @@
                 if(i === sec || i === _MASTER) db.ref('all_ads/' + id).remove();
             },
 
-            render(filtered = null) {
+            render(f = null) {
                 const boxes = { main: document.getElementById('main-ads-box'), lands: document.getElementById('lands-ads-box'), help: document.getElementById('help-box') };
                 Object.values(boxes).forEach(b => b.innerHTML = "");
-                const data = filtered || app.allAds;
+                const data = f || app.allAds;
 
                 data.forEach(item => {
                     const {id, ad} = item;
                     if(ad.type === 'help') {
                         boxes.help.innerHTML += `<div class="help-card">
                             <button class="btn-del" onclick="app.delAd('${id}','${ad.sec}')"><i class="fas fa-trash"></i></button>
-                            <div class="help-content">
-                                <b>أبحث عن عمال في (${ad.t})</b><br>
-                                <span style="color:#4ade80">اليومية: ${ad.p} د.ت</span>
-                            </div>
+                            <div style="flex:1"><b>أبحث عن عمال في (${ad.t})</b><br><span style="color:#4ade80">اليومية: ${ad.p} د.ت</span></div>
                             <a href="tel:${ad.ph}" class="btn-main" style="width:auto; padding:8px 15px; text-decoration:none">اتصال</a>
                         </div>`;
                     } else {
                         const html = `<div class="ad-card">
                             <button class="btn-del" onclick="app.delAd('${id}','${ad.sec}')"><i class="fas fa-trash"></i></button>
+                            ${ad.deal ? `<span class="land-badge">${ad.deal}</span>` : ''}
                             ${ad.img ? `<div class="ad-img"><img src="${ad.img}"></div>` : ''}
                             <div class="ad-info">
                                 <span class="ad-title">${ad.t}</span>
@@ -221,8 +214,7 @@
 
             search() {
                 const q = document.getElementById('search-in').value.toLowerCase();
-                const f = app.allAds.filter(i => i.ad.t.toLowerCase().includes(q) || (i.ad.loc && i.ad.loc.toLowerCase().includes(q)));
-                app.render(f);
+                app.render(app.allAds.filter(i => i.ad.t.toLowerCase().includes(q) || (i.ad.loc && i.ad.loc.toLowerCase().includes(q))));
             },
 
             init() {
