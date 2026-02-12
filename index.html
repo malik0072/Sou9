@@ -6,183 +6,159 @@
     
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="canonical" href="https://malik0072.github.io/Sou9/">
-    
     <meta name="google-site-verification" content="googlefbb8e99ef51bddaf" />
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="سوق المزرعة: منصة بيع وشراء المنتجات والآلات الزراعية في تونس. أضف إعلانك الآن مجاناً.">
-    <meta name="keywords" content="سوق المزرعة, بيع, شراء, زراعة, معدات زراعية, تونس, تستور">
 
-    <meta property="og:title" content="🚜 سوق المزرعة تونس">
-    <meta property="og:description" content="منصة بيع وشراء المنتجات الزراعية في تونس">
-    <meta property="og:url" content="https://malik0072.github.io/Sou9/">
-    <meta property="og:type" content="website">
-
-    <title>🚜 سوق المزرعة تونس - بيع وشراء المنتجات الزراعية</title>
+    <title>🚜 سوق المزرعة تونس</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        :root { --p: #2e7d32; --a: #ff9800; --bg: #f8f9fa; --glass: rgba(255, 255, 255, 0.95); }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --p: #1b4332; --a: #ff9800; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
 
-        /* الهيدر الثابت */
+        /* تعديل 1: الهيدر ثابت باسم "سوق المزرعة" دائماً */
         header { 
             position: sticky; top: 0; 
             background: var(--p); padding: 15px; 
             color: white; text-align: center; 
-            font-weight: bold; font-size: 1.2rem; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            font-weight: bold; font-size: 1.3rem; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
             z-index: 1500; flex-shrink: 0; 
-            cursor: pointer;
         }
         
-        .main-container { flex-grow: 1; overflow-y: auto; padding-bottom: 110px; }
-        .page { display: none; padding: 12px; animation: fadeIn 0.3s ease; }
+        /* تعديل 2: زيادة الـ padding السفلي لـ 200px لضمان ظهور الإعلان فوق الشريط تماماً */
+        .main-container { flex-grow: 1; overflow-y: auto; padding: 15px 10px 200px 10px; scroll-behavior: smooth; }
+
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* شبكة الإعلانات (3 في السطر) */
-        .ads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.06); display: flex; flex-direction: column; height: 210px; border: 1px solid #edf2f7; position: relative; }
+        .ads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .ad-card { background: var(--card); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; border: 1px solid #333; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         
-        /* الصورة مع مؤشر النقر للتكبير */
-        .ad-img { height: 80px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: zoom-in; }
-        .ad-img img { width: 100%; height: 100%; object-fit: cover; }
+        /* تعديل 3: إخفاء إطار الصورة إذا كانت فارغة */
+        .ad-img { background: #252525; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: zoom-in; }
+        .ad-img img { width: 100%; height: 100%; object-fit: cover; border: none; }
+        .ad-img:empty, .ad-img img[src=""], .ad-img img:not([src]) { display: none; }
         
-        .ad-info { padding: 6px 4px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .ad-info b { font-size: 0.75rem; color: #1e293b; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .ad-price { color: var(--p); font-weight: 800; font-size: 0.85rem; margin-top: 2px; }
-        .ad-tag { font-size: 0.55rem; color: #64748b; font-weight: bold; background: #f1f5f9; border-radius: 4px; padding: 1px 3px; margin-bottom: 2px; }
+        .ad-info { padding: 8px 4px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .ad-info b { font-size: 0.8rem; color: #fff; line-height: 1.3; margin-bottom: 4px; display: block; }
+        .ad-price { color: #4ade80; font-weight: 800; font-size: 0.9rem; }
         
-        .ad-btns { display: flex; border-top: 1px solid #f1f5f9; background: #fff; }
-        .ad-btns a { flex: 1; padding: 12px; text-align: center; color: var(--p); text-decoration: none; font-size: 1.1rem; }
-        .btn-call { border-left: 1px solid #f1f5f9; }
+        .ad-btns { display: flex; border-top: 1px solid #333; background: #252525; }
+        .ad-btns a { flex: 1; padding: 12px; text-align: center; color: #4ade80; text-decoration: none; font-size: 1.2rem; }
         
-        /* زر الحذف */
-        .btn-del-ad { position: absolute; top: 2px; left: 2px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 22px; height: 22px; color: red; z-index: 5; font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .btn-del-ad { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; width: 26px; height: 26px; color: #ff4d4d; z-index: 10; font-size: 12px; display: flex; align-items: center; justify-content: center; }
 
-        /* نافذة عرض الصورة الكبيرة */
-        #img-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
-        #img-viewer img { max-width: 100%; max-height: 85vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        #img-viewer .close-v { position: absolute; top: 30px; right: 30px; color: white; font-size: 2.5rem; cursor: pointer; }
+        .form-container { background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        input { width: 100%; padding: 14px; border: 1px solid #333; border-radius: 10px; margin-bottom: 12px; font-size: 1rem; background: #252525; color: white; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--a); }
+        
+        .btn-main { width: 100%; padding: 15px; background: var(--p); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
 
-        /* البار السفلي */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--glass); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 1px solid rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-btn { border: none; background: none; color: #94a3b8; font-size: 1.3rem; display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .nav-btn.active { color: var(--p); }
-        .nav-btn span { font-size: 0.6rem; margin-top: 4px; font-weight: 700; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 1px solid #333; z-index: 2000; }
+        .nav-btn { border: none; background: none; color: #777; font-size: 1.4rem; display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
+        .nav-btn.active { color: #4ade80; }
+        .nav-btn span { font-size: 0.7rem; margin-top: 6px; font-weight: 600; }
 
-        /* المودال والمدخلات */
-        .modal { display: none; position: fixed; inset: 0; background: white; z-index: 2000; padding: 25px; overflow-y: auto; }
+        #img-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 4000; align-items: center; justify-content: center; }
+        #img-viewer img { max-width: 95%; max-height: 85vh; border-radius: 10px; }
+        .modal { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 3000; padding: 20px; overflow-y: auto; }
         .modal.active { display: block; }
-        input { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; background: #f8fafc; outline: none; }
-        .btn-post-final { width: 100%; padding: 16px; background: var(--p); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; }
-        
-        .form-container { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     </style>
 </head>
 <body>
 
-    <header id="h-title" onclick="app.checkAdmin()">سوق المزرعة</header>
+    <header onclick="app.checkAdmin()">سوق المزرعة</header>
 
     <div class="main-container">
         <div id="home-pg" class="page active">
-            <input type="text" id="search-in" oninput="app.search()" placeholder="🔍 ابحث عن منتج أو سعر...">
+            <input type="text" id="search-in" oninput="app.search()" placeholder="🔍 ابحث هنا...">
             <div class="ads-grid" id="main-ads-box"></div>
         </div>
 
         <div id="lands-pg" class="page">
             <div class="form-container">
-                <h4 style="margin:0 0 12px 0; color: brown; border-right: 3px solid brown; padding-right: 8px;">نشر أرض للكراء</h4>
-                <input type="text" id="l-size" placeholder="المساحة (مثلاً: 1 هكتار)">
+                <h3 style="margin:0 0 15px 0; color: #ff6b6b;">نشر أرض للكراء</h3>
+                <input type="text" id="l-size" placeholder="المساحة">
                 <input type="number" id="l-price" placeholder="السعر">
                 <input type="text" id="l-loc" placeholder="المكان">
                 <input type="tel" id="l-phone" placeholder="رقم الهاتف">
-                <button onclick="app.postAd('lands')" id="btn-l" style="width:100%; padding:14px; background:brown; color:white; border:none; border-radius:12px; font-weight:bold;">نشر في الأراضي</button>
+                <button onclick="app.postAd('lands')" id="btn-l" class="btn-main" style="background:#9b2226;">نشر الآن</button>
             </div>
             <div class="ads-grid" id="lands-ads-box"></div>
         </div>
 
         <div id="help-pg" class="page">
             <div class="form-container">
-                <h4 style="margin:0 0 12px 0; color: var(--p); border-right: 3px solid var(--p); padding-right: 8px;">طلب عمال (عونة)</h4>
+                <h3 style="margin:0 0 15px 0; color: #4ade80;">طلب عونة (عمال)</h3>
                 <input type="text" id="h-title-in" placeholder="نوع العمل">
-                <input type="number" id="h-price" placeholder="اليومية (د.ت)">
+                <input type="number" id="h-price" placeholder="اليومية">
                 <input type="tel" id="h-phone" placeholder="رقم الهاتف">
-                <button onclick="app.postAd('help')" id="btn-h" style="width:100%; padding:14px; background:var(--a); color:white; border:none; border-radius:12px; font-weight:bold;">نشر طلب عمال</button>
+                <button onclick="app.postAd('help')" id="btn-h" class="btn-main">نشر الطلب</button>
             </div>
             <div class="ads-grid" id="help-box"></div>
         </div>
 
         <div id="dev-pg" class="page">
-            <div style="text-align:center; padding:40px 20px;">
-                <div style="width:90px; height:90px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:var(--p); margin:0 auto 15px; box-shadow:0 10px 20px rgba(0,0,0,0.1); border:3px solid #fff;"><i class="fas fa-user-gear"></i></div>
-                <h2 style="margin:0">المطور التقني</h2>
-                <p style="color:#64748b; margin-bottom:25px">دعم فني وتطوير الموقع ❤️ مالك</p>
-                <div style="background:white; padding:25px; border-radius:25px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                    <a href="tel:24023895" style="display:block; background:var(--p); color:white; padding:18px; border-radius:15px; text-decoration:none; font-weight:bold; font-size:1.1rem;"><i class="fas fa-phone-alt"></i> اتصل بي: 24023895</a>
-                    <p style="font-size: 0.8rem; color: #cbd5e1; margin-top: 15px;">صنع في تستور</p>
-                </div>
+            <div style="text-align:center; padding:60px 20px;">
+                <div style="font-size:4rem; color:var(--p); margin-bottom:20px;"><i class="fas fa-seedling"></i></div>
+                <h2>المطور: مالك</h2>
+                <p>صنع بكل فخر في تستور ❤️</p>
+                <a href="tel:24023895" class="btn-main" style="display:inline-block; text-decoration:none; width:auto; padding:15px 40px;">اتصل بي: 24023895</a>
             </div>
         </div>
     </div>
 
-    <div id="img-viewer" onclick="this.style.display='none'">
-        <span class="close-v">&times;</span>
-        <img id="full-img" src="">
-    </div>
+    <div id="img-viewer" onclick="this.style.display='none'"><img id="full-img"></div>
 
     <div id="add-modal" class="modal">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px">
-            <h3 style="margin:0">إضافة منتج للسوق</h3>
-            <button onclick="app.closeModal()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; font-size:1.2rem; color:#64748b">&times;</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+            <h2>إعلان جديد</h2>
+            <button onclick="app.closeModal()" style="background:none; border:none; color:white; font-size:2rem;">&times;</button>
         </div>
         <input type="file" id="f-img" accept="image/*" onchange="app.preview(this)">
-        <div id="img-pre" style="height:120px; background:#f8fafc; margin-bottom:15px; display:none; border-radius:15px; overflow:hidden; border:2px dashed #cbd5e1"></div>
+        <div id="img-pre" style="height:150px; background:#252525; margin-bottom:15px; display:none; border-radius:10px; overflow:hidden;"></div>
         <input type="text" id="f-title" placeholder="اسم المنتج">
-        <input type="number" id="f-price" placeholder="الثمن (د.ت)">
-        <input type="tel" id="f-phone" placeholder="رقم هاتفك">
-        <button onclick="app.postAd('main')" id="btn-m" class="btn-post-final">نشر الإعلان الآن</button>
+        <input type="number" id="f-price" placeholder="الثمن">
+        <input type="tel" id="f-phone" placeholder="رقم الهاتف">
+        <button onclick="app.postAd('main')" id="btn-m" class="btn-main">نشر الإعلان</button>
     </div>
 
     <nav class="nav-bar">
         <button class="nav-btn active" onclick="app.nav('home-pg', this)"><i class="fas fa-home"></i><span>الرئيسية</span></button>
         <button class="nav-btn" onclick="app.nav('lands-pg', this)"><i class="fas fa-mountain"></i><span>الأراضي</span></button>
-        <button class="nav-btn" onclick="app.openModal()" style="color:var(--a);"><i class="fas fa-plus-circle" style="font-size:2.5rem; transform:translateY(-5px)"></i></button>
-        <button class="nav-btn" onclick="app.nav('dev-pg', this)"><i class="fas fa-id-card"></i><span>المطور</span></button>
-        <button class="nav-btn" onclick="app.nav('help-pg', this)"><i class="fas fa-people-group"></i><span>العونة</span></button>
+        <button class="nav-btn" onclick="app.openModal()"><i class="fas fa-plus-circle" style="font-size:2.8rem; color:var(--a);"></i></button>
+        <button class="nav-btn" onclick="app.nav('dev-pg', this)"><i class="fas fa-code"></i><span>المطور</span></button>
+        <button class="nav-btn" onclick="app.nav('help-pg', this)"><i class="fas fa-users"></i><span>العونة</span></button>
     </nav>
 
     <script>
         const firebaseConfig = { databaseURL: "https://sou9-c7e27-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const _0xM = ["\x40\x31\x35\x33\x30\x39\x30\x32\x35\x40"]; // كود المدير الماستر
+        const _0xM = ["\x40\x31\x35\x33\x30\x39\x30\x32\x35\x40"];
 
         const app = {
             adsData: { main: [] },
-
             nav: (id, btn) => {
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById(id).classList.add('active');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                document.getElementById('h-title').innerText = btn.querySelector('span').innerText;
+                // تم حذف سطر تغيير الـ Header ليبقى ثابت "سوق المزرعة"
             },
-
             openModal: () => document.getElementById('add-modal').classList.add('active'),
             closeModal: () => document.getElementById('add-modal').classList.remove('active'),
-
-            // وظيفة عرض الصورة الكبيرة
             viewImg: (url) => {
                 if(!url) return;
                 document.getElementById('full-img').src = url;
                 document.getElementById('img-viewer').style.display = 'flex';
             },
-
             preview: (input) => {
                 if (input.files && input.files[0]) {
                     const reader = new FileReader();
@@ -194,7 +170,6 @@
                     reader.readAsDataURL(input.files[0]);
                 }
             },
-
             async compress(file) {
                 return new Promise(res => {
                     const reader = new FileReader(); reader.readAsDataURL(file);
@@ -202,79 +177,60 @@
                         const img = new Image(); img.src = e.target.result;
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
-                            const maxWidth = 500;
-                            if(img.width > maxWidth){ canvas.width = maxWidth; canvas.height = img.height * (maxWidth / img.width); }
-                            else { canvas.width = img.width; canvas.height = img.height; }
+                            canvas.width = 500; canvas.height = img.height * (500 / img.width);
                             canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-                            canvas.toBlob(blob => res(blob),'image/jpeg',0.6);
+                            canvas.toBlob(blob => res(blob),'image/jpeg',0.7);
                         }
                     }
                 });
             },
-
             async postAd(type) {
                 let t, p, ph, file, loc="", size="", btnId;
-                
                 if(type === 'main') {
                     t = document.getElementById('f-title').value; p = document.getElementById('f-price').value; 
                     ph = document.getElementById('f-phone').value; file = document.getElementById('f-img').files[0];
                     btnId = 'btn-m';
-                    if(!file) return alert("الرجاء اختيار صورة!");
                 } else if(type === 'lands') {
                     size = document.getElementById('l-size').value; p = document.getElementById('l-price').value;
                     ph = document.getElementById('l-phone').value; loc = document.getElementById('l-loc').value;
-                    t = "أرض للكراء"; btnId = 'btn-l';
+                    t = "أرض لكراء: " + loc; btnId = 'btn-l';
                 } else {
                     t = document.getElementById('h-title-in').value; p = document.getElementById('h-price').value;
                     ph = document.getElementById('h-phone').value; btnId = 'btn-h';
                 }
-
-                if(!t || !p || !ph) return alert("أكمل جميع الخانات!");
-                const b = document.getElementById(btnId); b.disabled = true; b.innerText = "⏳ جاري الرفع...";
-
+                if(!t || !p || !ph) return alert("أكمل البيانات");
+                const b = document.getElementById(btnId); b.disabled = true; b.innerText = "⏳...";
                 let imgUrl = "";
                 if(file) {
-                    try {
-                        const blob = await this.compress(file);
-                        const fd = new FormData(); fd.append('image', blob);
-                        const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{ method:'POST', body:fd });
-                        const data = await res.json();
-                        imgUrl = data.data.url;
-                    } catch(e) { alert("خطأ في رفع الصورة!"); b.disabled=false; return; }
+                    const blob = await this.compress(file);
+                    const fd = new FormData(); fd.append('image', blob);
+                    const res = await fetch('https://api.imgbb.com/1/upload?key=095fed96bdc0302b815406d636818189',{ method:'POST', body:fd });
+                    const d = await res.json(); imgUrl = d.data.url;
                 }
-
                 const sec = Math.random().toString(36).substring(7).toUpperCase();
                 const adRef = await db.ref('all_ads').push({ t, p, ph, img: imgUrl, loc, size, type, sec, d: Date.now() });
-                localStorage.setItem('my_code_' + adRef.key, sec); // حفظ الكود في المتصفح
-                alert("✅ تم النشر! كود الحذف الخاص بك: " + sec);
+                localStorage.setItem('my_code_' + adRef.key, sec);
                 location.reload();
             },
-
             createCard: (id, ad) => `
                 <div class="ad-card">
-                    <button class="btn-del-ad" onclick="app.delAd('${id}','${ad.sec}')">×</button>
-                    <div class="ad-img" onclick="app.viewImg('${ad.img}')">
-                        ${ad.img ? `<img src="${ad.img}" loading="lazy">` : `<i class="fas fa-image" style="color:#cbd5e1; font-size:2rem"></i>`}
-                    </div>
+                    <button class="btn-del-ad" onclick="app.delAd('${id}','${ad.sec}')"><i class="fas fa-trash"></i></button>
+                    ${ad.img ? `<div class="ad-img" onclick="app.viewImg('${ad.img}')"><img src="${ad.img}" loading="lazy"></div>` : ''}
                     <div class="ad-info">
-                        ${ad.size ? `<span class="ad-tag">${ad.size}</span>` : ''}
                         <b>${ad.t}</b>
-                        ${ad.loc ? `<span style="font-size:0.55rem; color:#94a3b8">${ad.loc}</span>` : ''}
                         <span class="ad-price">${ad.p} د.ت</span>
                     </div>
                     <div class="ad-btns">
-                        <a href="tel:${ad.ph}" class="btn-call"><i class="fas fa-phone-alt"></i></a>
+                        <a href="tel:${ad.ph}"><i class="fas fa-phone-alt"></i></a>
                         <a href="https://wa.me/216${ad.ph}"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>`,
-
             render: () => {
                 db.ref('all_ads').on('value', s => {
                     const data = s.val();
                     const boxes = { main: document.getElementById('main-ads-box'), lands: document.getElementById('lands-ads-box'), help: document.getElementById('help-box') };
                     Object.values(boxes).forEach(b => b.innerHTML = "");
                     app.adsData.main = [];
-
                     if(data) {
                         Object.entries(data).reverse().forEach(([id, ad]) => {
                             const html = app.createCard(id, ad);
@@ -285,27 +241,21 @@
                     }
                 });
             },
-
             delAd(id, serverCode) {
-                const savedCode = localStorage.getItem('my_code_' + id) || "";
-                const input = prompt("أدخل كود الحذف:", savedCode);
-                if(input === serverCode || input === _0xM[0]) {
-                    if(confirm("هل تريد حذف هذا الإعلان نهائياً؟")) db.ref('all_ads/' + id).remove();
-                } else if(input !== null) alert("الكود غير صحيح!");
+                const sc = localStorage.getItem('my_code_' + id) || "";
+                const input = prompt("كود الحذف:", sc);
+                if(input === serverCode || input === _0xM[0]) db.ref('all_ads/' + id).remove();
             },
-
             search: () => {
                 const q = document.getElementById('search-in').value.toLowerCase();
-                const filtered = app.adsData.main.filter(ad => ad.t.toLowerCase().includes(q) || ad.p.includes(q));
-                document.getElementById('main-ads-box').innerHTML = filtered.map(ad => app.createCard(ad.id, ad)).join('');
+                const f = app.adsData.main.filter(ad => ad.t.toLowerCase().includes(q));
+                document.getElementById('main-ads-box').innerHTML = f.map(ad => app.createCard(ad.id, ad)).join('');
             },
-
             checkAdmin: () => {
                 const input = prompt("كود المدير:");
-                if(input === _0xM[0]) alert("مرحباً يا مدير سوق المزرعة!");
+                if(input === _0xM[0]) alert("مرحباً بك!");
             }
         };
-
         app.render();
     </script>
 </body>
