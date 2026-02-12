@@ -6,10 +6,13 @@
     
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="canonical" href="https://malik0072.github.io/Sou9/">
-    <meta name="google-site-verification" content="googlefbb8e99ef51bddaf" />
-    <meta name="description" content="سوق المزرعة: منصة بيع وشراء المنتجات والآلات الزراعية في تونس.">
     
-    <title>🚜 سوق المزرعة تونس</title>
+    <meta name="google-site-verification" content="googlefbb8e99ef51bddaf" />
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="سوق المزرعة: منصة بيع وشراء المنتجات والآلات الزراعية في تونس. أضف إعلانك الآن مجاناً.">
+    <meta name="keywords" content="سوق المزرعة, بيع, شراء, زراعة, معدات زراعية, تونس, تستور">
+
+    <title>🚜 سوق المزرعة تونس - بيع وشراء المنتجات الزراعية</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -20,7 +23,6 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* تعديل: جعل الهيدر دائماً في الأعلى */
         header { 
             position: sticky; top: 0; 
             background: var(--p); padding: 15px; 
@@ -38,22 +40,22 @@
         .ads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .ad-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.06); display: flex; flex-direction: column; height: 200px; border: 1px solid #edf2f7; position: relative; }
         
-        /* تعديل: تحسين مظهر الصورة وإضافة مؤشر النقر */
         .ad-img { height: 75px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: zoom-in; }
         .ad-img img { width: 100%; height: 100%; object-fit: cover; }
         
         .ad-info { padding: 6px 4px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .ad-info b { font-size: 0.7rem; color: #1e293b; line-height: 1.2; }
-        .ad-price { color: var(--p); font-weight: 800; font-size: 0.8rem; }
+        .ad-info b { font-size: 0.7rem; color: #1e293b; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .ad-price { color: var(--p); font-weight: 800; font-size: 0.8rem; margin-top: 2px; }
         
         .ad-btns { display: flex; border-top: 1px solid #f1f5f9; background: #fff; }
         .ad-btns a { flex: 1; padding: 10px; text-align: center; color: var(--p); text-decoration: none; font-size: 1rem; }
-        .btn-del-ad { position: absolute; top: 2px; left: 2px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 22px; height: 22px; color: red; z-index: 5; font-size: 10px; }
+        .btn-call { border-left: 1px solid #f1f5f9; }
+        .btn-del-ad { position: absolute; top: 2px; left: 2px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 22px; height: 22px; color: red; z-index: 5; font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
-        /* نافذة مشاهدة الصورة الكبيرة */
+        /* نافذة عرض الصورة */
         #img-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
-        #img-viewer img { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        #img-viewer .close-v { position: absolute; top: 30px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
+        #img-viewer img { max-width: 100%; max-height: 85vh; border-radius: 10px; }
+        #img-viewer .close-v { position: absolute; top: 30px; right: 30px; color: white; font-size: 2.5rem; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--glass); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 1px solid rgba(0,0,0,0.05); z-index: 1000; }
         .nav-btn { border: none; background: none; color: #94a3b8; font-size: 1.3rem; display: flex; flex-direction: column; align-items: center; flex: 1; }
@@ -155,7 +157,6 @@
             openModal: () => document.getElementById('add-modal').classList.add('active'),
             closeModal: () => document.getElementById('add-modal').classList.remove('active'),
 
-            // تعديل: وظيفة عرض الصورة الكبيرة
             viewImg: (url) => {
                 if(!url) return;
                 document.getElementById('full-img').src = url;
@@ -218,7 +219,8 @@
                 }
 
                 const sec = Math.random().toString(36).substring(7).toUpperCase();
-                await db.ref('all_ads').push({ t, p, ph, img: imgUrl, loc, size, type, sec, d: Date.now() });
+                const adRef = await db.ref('all_ads').push({ t, p, ph, img: imgUrl, loc, size, type, sec, d: Date.now() });
+                localStorage.setItem('my_code_' + adRef.key, sec); // حفظ كود الحذف في الجهاز
                 location.reload();
             },
 
@@ -233,7 +235,7 @@
                         <span class="ad-price">${ad.p} د.ت</span>
                     </div>
                     <div class="ad-btns">
-                        <a href="tel:${ad.ph}"><i class="fas fa-phone-alt"></i></a>
+                        <a href="tel:${ad.ph}" class="btn-call"><i class="fas fa-phone-alt"></i></a>
                         <a href="https://wa.me/216${ad.ph}"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>`,
@@ -256,8 +258,11 @@
             },
 
             delAd(id, serverCode) {
-                const input = prompt("أدخل كود الحذف:");
-                if(input === serverCode || input === _0xM[0]) db.ref('all_ads/' + id).remove();
+                const savedCode = localStorage.getItem('my_code_' + id) || "";
+                const input = prompt("أدخل كود الحذف:", savedCode);
+                if(input === serverCode || input === _0xM[0]) {
+                    if(confirm("هل تريد الحذف؟")) db.ref('all_ads/' + id).remove();
+                } else if(input !== null) alert("الكود خاطئ");
             },
 
             search: () => {
@@ -268,7 +273,7 @@
 
             checkAdmin: () => {
                 const input = prompt("كود المدير:");
-                if(input === _0xM[0]) alert("مرحباً يا مدير!");
+                if(input === _0xM[0]) alert("مرحباً بك يا مدير!");
             }
         };
 
